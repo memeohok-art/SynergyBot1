@@ -96,4 +96,4 @@ echo
 bold "Done. Follow the log with:"
 echo "    journalctl -u $SERVICE_NAME -f"
 echo
-echo "Look for:  'Logged in as Synergy'  and  'Commands loaded: 98'"
+echo "Look for:  'Logged in as Synergy'  and  'Commands loaded: 99'"

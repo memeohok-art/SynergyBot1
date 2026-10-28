@@ -244,7 +244,7 @@ async def get_owner() -> Optional[discord.User]:
 # 1. CORE
 # ===========================================================================
 
-@bot.command(name="ping")
+@bot.hybrid_command(name="ping")
 async def ping(ctx: commands.Context) -> None:
     """Check the bot's latency."""
     start = time.perf_counter()
@@ -262,7 +262,7 @@ async def ping(ctx: commands.Context) -> None:
     )
 
 
-@bot.command(name="help")
+@bot.hybrid_command(name="help")
 async def help_cmd(ctx: commands.Context, *, command: Optional[str] = None) -> None:
     """Show every command, or details for one command."""
     if command:
@@ -296,11 +296,14 @@ async def help_cmd(ctx: commands.Context, *, command: Optional[str] = None) -> N
                 listed.append(f"`{name}`")
         if listed:
             embed.add_field(name=category, value=" ".join(listed), inline=False)
-    embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
+    embed.set_footer(
+        text=f"Every command works as a slash command too  •  requested by {ctx.author}",
+        icon_url=ctx.author.display_avatar.url,
+    )
     await ctx.send(embed=embed)
 
 
-@bot.command(name="botinfo", aliases=["about"])
+@bot.hybrid_command(name="botinfo", aliases=["about"])
 async def botinfo(ctx: commands.Context) -> None:
     """Show information about this bot."""
     embed = discord.Embed(title="Bot info", colour=COLOUR_INFO)
@@ -318,13 +321,13 @@ async def botinfo(ctx: commands.Context) -> None:
 START_TIME = time.time()
 
 
-@bot.command(name="uptime")
+@bot.hybrid_command(name="uptime")
 async def uptime(ctx: commands.Context) -> None:
     """How long the bot has been online."""
     await ctx.send(embed=info(f"Online for **{fmt_duration(time.time() - START_TIME)}**", "⏱ Uptime"))
 
 
-@bot.command(name="invite")
+@bot.hybrid_command(name="invite")
 async def invite(ctx: commands.Context) -> None:
     """Get a link to add this bot to another server."""
     perms = discord.Permissions(administrator=True)
@@ -346,7 +349,7 @@ async def live_guild_counts(guild: discord.Guild) -> tuple[Optional[int], Option
         return guild.member_count, None
 
 
-@bot.command(name="membercount", aliases=["mc"])
+@bot.hybrid_command(name="membercount", aliases=["mc"])
 @commands.guild_only()
 async def membercount(ctx: commands.Context) -> None:
     """Show how many people are in the server."""
@@ -375,7 +378,7 @@ async def membercount(ctx: commands.Context) -> None:
 # 2. MODERATION
 # ===========================================================================
 
-@bot.command(name="ban")
+@bot.hybrid_command(name="ban")
 @commands.guild_only()
 @commands.has_permissions(ban_members=True)
 @commands.bot_has_permissions(ban_members=True)
@@ -390,7 +393,7 @@ async def ban(ctx: commands.Context, member: discord.Member, *, reason: str = "N
     await log_action(ctx.guild, f"{ctx.author.mention} banned {member} — {reason}")
 
 
-@bot.command(name="unban")
+@bot.hybrid_command(name="unban")
 @commands.guild_only()
 @commands.has_permissions(ban_members=True)
 @commands.bot_has_permissions(ban_members=True)
@@ -406,7 +409,7 @@ async def unban(ctx: commands.Context, user_id: int, *, reason: str = "No reason
     await log_action(ctx.guild, f"{ctx.author.mention} unbanned {user} — {reason}")
 
 
-@bot.command(name="kick")
+@bot.hybrid_command(name="kick")
 @commands.guild_only()
 @commands.has_permissions(kick_members=True)
 @commands.bot_has_permissions(kick_members=True)
@@ -421,7 +424,7 @@ async def kick(ctx: commands.Context, member: discord.Member, *, reason: str = "
     await log_action(ctx.guild, f"{ctx.author.mention} kicked {member} — {reason}")
 
 
-@bot.command(name="softban")
+@bot.hybrid_command(name="softban")
 @commands.guild_only()
 @commands.has_permissions(ban_members=True)
 @commands.bot_has_permissions(ban_members=True)
@@ -436,7 +439,7 @@ async def softban(ctx: commands.Context, member: discord.Member, *, reason: str 
     await ctx.send(embed=ok(f"🧹 Softbanned **{member}** (messages cleared, they can rejoin)"))
 
 
-@bot.command(name="timeout", aliases=["mute"])
+@bot.hybrid_command(name="timeout", aliases=["mute"])
 @commands.guild_only()
 @commands.has_permissions(moderate_members=True)
 @commands.bot_has_permissions(moderate_members=True)
@@ -457,7 +460,7 @@ async def timeout(ctx: commands.Context, member: discord.Member, duration: str =
     await ctx.send(embed=ok(f"🔇 **{member}** is timed out for **{fmt_duration(seconds)}**\n**Reason:** {reason}"))
 
 
-@bot.command(name="untimeout", aliases=["unmute"])
+@bot.hybrid_command(name="untimeout", aliases=["unmute"])
 @commands.guild_only()
 @commands.has_permissions(moderate_members=True)
 @commands.bot_has_permissions(moderate_members=True)
@@ -470,7 +473,7 @@ async def untimeout(ctx: commands.Context, member: discord.Member) -> None:
 WARNINGS: dict[int, list[tuple[str, str]]] = {}
 
 
-@bot.command(name="warn")
+@bot.hybrid_command(name="warn")
 @commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def warn(ctx: commands.Context, member: discord.Member, *, reason: str = "No reason given") -> None:
@@ -489,7 +492,7 @@ async def warn(ctx: commands.Context, member: discord.Member, *, reason: str = "
         pass
 
 
-@bot.command(name="warnings", aliases=["warns"])
+@bot.hybrid_command(name="warnings", aliases=["warns"])
 @commands.guild_only()
 async def warnings(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """List a member's warnings."""
@@ -502,7 +505,7 @@ async def warnings(ctx: commands.Context, member: Optional[discord.Member] = Non
     await ctx.send(embed=info("\n".join(lines[:20]), f"⚠️ {target} — {len(entries)} warning(s)"))
 
 
-@bot.command(name="clearwarnings", aliases=["clearwarns"])
+@bot.hybrid_command(name="clearwarnings", aliases=["clearwarns"])
 @commands.guild_only()
 @commands.has_permissions(administrator=True)
 async def clearwarnings(ctx: commands.Context, member: discord.Member) -> None:
@@ -512,7 +515,7 @@ async def clearwarnings(ctx: commands.Context, member: discord.Member) -> None:
     await ctx.send(embed=ok(f"Cleared warnings for **{member}**."))
 
 
-@bot.command(name="purge", aliases=["clear"])
+@bot.hybrid_command(name="purge", aliases=["clear"])
 @commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 @commands.bot_has_permissions(manage_messages=True)
@@ -523,7 +526,7 @@ async def purge(ctx: commands.Context, amount: int = 10) -> None:
     await ctx.send(embed=ok(f"🗑 Deleted **{len(deleted) - 1}** message(s)."), delete_after=5)
 
 
-@bot.command(name="slowmode")
+@bot.hybrid_command(name="slowmode")
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 @commands.bot_has_permissions(manage_channels=True)
@@ -537,7 +540,7 @@ async def slowmode(ctx: commands.Context, duration: str = "0s") -> None:
     await ctx.send(embed=ok(f"🐌 Slowmode set to **{fmt_duration(seconds)}**." if seconds else "🐇 Slowmode disabled."))
 
 
-@bot.command(name="lock")
+@bot.hybrid_command(name="lock")
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 @commands.bot_has_permissions(manage_channels=True)
@@ -549,7 +552,7 @@ async def lock(ctx: commands.Context) -> None:
     await ctx.send(embed=ok("🔒 Channel locked."))
 
 
-@bot.command(name="unlock")
+@bot.hybrid_command(name="unlock")
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 @commands.bot_has_permissions(manage_channels=True)
@@ -561,7 +564,7 @@ async def unlock(ctx: commands.Context) -> None:
     await ctx.send(embed=ok("🔓 Channel unlocked."))
 
 
-@bot.command(name="nuke")
+@bot.hybrid_command(name="nuke")
 @commands.guild_only()
 @commands.has_permissions(administrator=True)
 @commands.bot_has_permissions(manage_channels=True)
@@ -575,7 +578,7 @@ async def nuke(ctx: commands.Context) -> None:
     await clone.send(embed=ok("💥 Channel nuked. Fresh start."))
 
 
-@bot.command(name="addrole", aliases=["giverole"])
+@bot.hybrid_command(name="addrole", aliases=["giverole"])
 @commands.guild_only()
 @commands.has_permissions(manage_roles=True)
 @commands.bot_has_permissions(manage_roles=True)
@@ -588,7 +591,7 @@ async def addrole(ctx: commands.Context, member: discord.Member, *, role: discor
     await ctx.send(embed=ok(f"✅ Gave {role.mention} to **{member}**."))
 
 
-@bot.command(name="removerole", aliases=["takerole"])
+@bot.hybrid_command(name="removerole", aliases=["takerole"])
 @commands.guild_only()
 @commands.has_permissions(manage_roles=True)
 @commands.bot_has_permissions(manage_roles=True)
@@ -601,7 +604,7 @@ async def removerole(ctx: commands.Context, member: discord.Member, *, role: dis
     await ctx.send(embed=ok(f"➖ Removed {role.mention} from **{member}**."))
 
 
-@bot.command(name="nick")
+@bot.hybrid_command(name="nick")
 @commands.guild_only()
 @commands.has_permissions(manage_nicknames=True)
 @commands.bot_has_permissions(manage_nicknames=True)
@@ -611,16 +614,17 @@ async def nick(ctx: commands.Context, member: discord.Member, *, nickname: Optio
     await ctx.send(embed=ok(f"✏️ Nickname set to **{nickname or member.name}**."))
 
 
-@bot.command(name="say")
+@bot.hybrid_command(name="say")
 @commands.guild_only()
 @commands.has_permissions(manage_messages=True)
 async def say(ctx: commands.Context, *, text: str) -> None:
     """Make the bot repeat something."""
-    await ctx.message.delete()
+    if ctx.message is not None:
+        await ctx.message.delete()
     await ctx.send(text)
 
 
-@bot.command(name="announce")
+@bot.hybrid_command(name="announce")
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def announce(ctx: commands.Context, channel: discord.TextChannel, *, text: str) -> None:
@@ -635,7 +639,7 @@ async def announce(ctx: commands.Context, channel: discord.TextChannel, *, text:
 # 3. INFO / USER COMMANDS
 # ===========================================================================
 
-@bot.command(name="userinfo", aliases=["whois"])
+@bot.hybrid_command(name="userinfo", aliases=["whois"])
 @commands.guild_only()
 async def userinfo(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Show information about a member."""
@@ -654,7 +658,7 @@ async def userinfo(ctx: commands.Context, member: Optional[discord.Member] = Non
     await ctx.send(embed=embed)
 
 
-@bot.command(name="serverinfo")
+@bot.hybrid_command(name="serverinfo")
 @commands.guild_only()
 async def serverinfo(ctx: commands.Context) -> None:
     """Show information about this server."""
@@ -674,7 +678,7 @@ async def serverinfo(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-@bot.command(name="avatar", aliases=["av", "pfp"])
+@bot.hybrid_command(name="avatar", aliases=["av", "pfp"])
 async def avatar(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Show someone's avatar."""
     m = member or ctx.author
@@ -683,7 +687,7 @@ async def avatar(ctx: commands.Context, member: Optional[discord.Member] = None)
     await ctx.send(embed=embed)
 
 
-@bot.command(name="servericon", aliases=["icon"])
+@bot.hybrid_command(name="servericon", aliases=["icon"])
 @commands.guild_only()
 async def servericon(ctx: commands.Context) -> None:
     """Show the server icon."""
@@ -695,7 +699,7 @@ async def servericon(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-@bot.command(name="roles")
+@bot.hybrid_command(name="roles")
 @commands.guild_only()
 async def roles(ctx: commands.Context) -> None:
     """List every role in the server."""
@@ -712,7 +716,7 @@ async def roles(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-@bot.command(name="channelinfo", aliases=["cinfo"])
+@bot.hybrid_command(name="channelinfo", aliases=["cinfo"])
 @commands.guild_only()
 async def channelinfo(ctx: commands.Context, channel: Optional[discord.TextChannel] = None) -> None:
     """Show information about a channel."""
@@ -737,7 +741,7 @@ async def on_message_delete(message: discord.Message) -> None:
     SNIPES[message.channel.id] = (str(message.author), message.content or "[attachment]")
 
 
-@bot.command(name="snipe")
+@bot.hybrid_command(name="snipe")
 @commands.guild_only()
 async def snipe(ctx: commands.Context) -> None:
     """Show the most recently deleted message in this channel."""
@@ -754,14 +758,14 @@ async def snipe(ctx: commands.Context) -> None:
 AFK: dict[int, str] = {}
 
 
-@bot.command(name="afk")
+@bot.hybrid_command(name="afk")
 async def afk(ctx: commands.Context, *, reason: str = "AFK") -> None:
     """Set an AFK status. Usage: !afk grabbing food"""
     AFK[ctx.author.id] = reason
     await ctx.send(embed=ok(f"💤 **{ctx.author.display_name}** is now AFK: {reason}"))
 
 
-@bot.command(name="remind", aliases=["reminder"])
+@bot.hybrid_command(name="remind", aliases=["reminder"])
 async def remind(ctx: commands.Context, duration: str, *, text: str = "something") -> None:
     """Set a reminder. Usage: !remind 10m check the oven"""
     seconds = parse_duration(duration)
@@ -783,7 +787,7 @@ async def remind(ctx: commands.Context, duration: str, *, text: str = "something
     asyncio.create_task(waiter())
 
 
-@bot.command(name="poll")
+@bot.hybrid_command(name="poll")
 @commands.guild_only()
 async def poll(ctx: commands.Context, *, text: str) -> None:
     """Create a reaction poll. Usage: !poll Pizza | Sushi | Tacos"""
@@ -801,7 +805,7 @@ async def poll(ctx: commands.Context, *, text: str) -> None:
         await msg.add_reaction(emojis[i])
 
 
-@bot.command(name="math", aliases=["calc"])
+@bot.hybrid_command(name="math", aliases=["calc"])
 async def math(ctx: commands.Context, *, expression: str) -> None:
     """Do simple math. Usage: !math (12+8)*3"""
     ops = {
@@ -835,7 +839,7 @@ async def math(ctx: commands.Context, *, expression: str) -> None:
     await ctx.send(embed=info(f"`{expression}` = **{result}**", "🧮 Result"))
 
 
-@bot.command(name="b64")
+@bot.hybrid_command(name="b64")
 async def b64(ctx: commands.Context, mode: str, *, text: str) -> None:
     """Base64 encode or decode. Usage: !b64 encode hello  /  !b64 decode aGVsbG8="""
     if mode.lower().startswith("e"):
@@ -852,7 +856,7 @@ async def b64(ctx: commands.Context, mode: str, *, text: str) -> None:
     await ctx.send(embed=info(f"```{out[:1800]}```", "🔐 Base64"))
 
 
-@bot.command(name="password")
+@bot.hybrid_command(name="password")
 async def password(ctx: commands.Context, length: int = 16) -> None:
     """Generate a random password. Usage: !password 20"""
     length = max(6, min(length, 128))
@@ -861,7 +865,7 @@ async def password(ctx: commands.Context, length: int = 16) -> None:
     await ctx.send(embed=info(f"```{pwd}```\nCopy it somewhere safe — this message is public.", "🔑 Password"))
 
 
-@bot.command(name="randomnumber", aliases=["randnum"])
+@bot.hybrid_command(name="randomnumber", aliases=["randnum"])
 async def randomnumber(ctx: commands.Context, low: int = 1, high: int = 100) -> None:
     """Random number in a range. Usage: !randomnumber 1 10"""
     if low > high:
@@ -869,14 +873,14 @@ async def randomnumber(ctx: commands.Context, low: int = 1, high: int = 100) -> 
     await ctx.send(embed=fun(f"🎲 **{random.randint(low, high)}** (from {low}–{high})"))
 
 
-@bot.command(name="uuidgen", aliases=["uuid"])
+@bot.hybrid_command(name="uuidgen", aliases=["uuid"])
 async def uuidgen(ctx: commands.Context) -> None:
     """Generate a random UUID v4."""
     import uuid as _uuid
     await ctx.send(embed=info(f"`{_uuid.uuid4()}`", "🔖 UUID"))
 
 
-@bot.command(name="lmgtfy")
+@bot.hybrid_command(name="lmgtfy")
 async def lmgtfy(ctx: commands.Context, *, query: str) -> None:
     """Let me Google that for you."""
     from urllib.parse import quote_plus
@@ -884,7 +888,7 @@ async def lmgtfy(ctx: commands.Context, *, query: str) -> None:
     await ctx.send(embed=info(f"[{query}]({url})", "🔍 Search"))
 
 
-@bot.command(name="timestamp")
+@bot.hybrid_command(name="timestamp")
 async def timestamp(ctx: commands.Context, duration: str = "1h") -> None:
     """Get a Discord timestamp for a time from now. Usage: !timestamp 2d"""
     seconds = parse_duration(duration) or 3600
@@ -897,7 +901,7 @@ async def timestamp(ctx: commands.Context, duration: str = "1h") -> None:
 # 4. FUN
 # ===========================================================================
 
-@bot.command(name="8ball")
+@bot.hybrid_command(name="8ball")
 async def eightball(ctx: commands.Context, *, question: str) -> None:
     """Ask the magic 8-ball a question."""
     answers = [
@@ -910,7 +914,7 @@ async def eightball(ctx: commands.Context, *, question: str) -> None:
     await ctx.send(embed=embed)
 
 
-@bot.command(name="roll", aliases=["dice"])
+@bot.hybrid_command(name="roll", aliases=["dice"])
 async def roll(ctx: commands.Context, dice: str = "1d6") -> None:
     """Roll dice. Usage: !roll 2d20"""
     match = re.fullmatch(r"(\d{1,2})d(\d{1,3})", dice.lower().replace(" ", ""))
@@ -927,13 +931,13 @@ async def roll(ctx: commands.Context, dice: str = "1d6") -> None:
     await ctx.send(embed=fun(desc, f"🎲 {dice}"))
 
 
-@bot.command(name="coinflip", aliases=["flip"])
+@bot.hybrid_command(name="coinflip", aliases=["flip"])
 async def coinflip(ctx: commands.Context) -> None:
     """Flip a coin."""
     await ctx.send(embed=fun(f"🪙 **{random.choice(['Heads', 'Tails'])}**"))
 
 
-@bot.command(name="choose", aliases=["pick"])
+@bot.hybrid_command(name="choose", aliases=["pick"])
 async def choose(ctx: commands.Context, *, options: str) -> None:
     """Pick between options. Usage: !choose pizza | burger | salad"""
     parts = [p.strip() for p in re.split(r"[|,]", options) if p.strip()]
@@ -943,7 +947,7 @@ async def choose(ctx: commands.Context, *, options: str) -> None:
     await ctx.send(embed=fun(f"👉 **{random.choice(parts)}**", "I choose..."))
 
 
-@bot.command(name="rps")
+@bot.hybrid_command(name="rps")
 async def rps(ctx: commands.Context, choice: str) -> None:
     """Rock paper scissors. Usage: !rps rock"""
     c = choice.lower().rstrip("s")
@@ -1051,45 +1055,45 @@ FORTUNES = [
 ]
 
 
-@bot.command(name="joke")
+@bot.hybrid_command(name="joke")
 async def joke(ctx: commands.Context) -> None:
     """Tell a random joke."""
     await ctx.send(embed=fun(random.choice(JOKES), "😂"))
 
 
-@bot.command(name="dadjoke")
+@bot.hybrid_command(name="dadjoke")
 async def dadjoke(ctx: commands.Context) -> None:
     """A painfully dad-tier joke."""
     await ctx.send(embed=fun(random.choice(DADJOKES), "👨 Joke"))
 
 
-@bot.command(name="quote")
+@bot.hybrid_command(name="quote")
 async def quote(ctx: commands.Context) -> None:
     """Random motivational quote."""
     await ctx.send(embed=fun(random.choice(QUOTES), "💬 Quote"))
 
 
-@bot.command(name="fact")
+@bot.hybrid_command(name="fact")
 async def fact(ctx: commands.Context) -> None:
     """Random useless fact."""
     await ctx.send(embed=fun(random.choice(FACTS), "🧠 Fact"))
 
 
-@bot.command(name="compliment")
+@bot.hybrid_command(name="compliment")
 async def compliment(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Compliment someone."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"{target.mention} {random.choice(COMPLIMENTS)}", "💐"))
 
 
-@bot.command(name="roast")
+@bot.hybrid_command(name="roast")
 async def roast(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Playfully roast someone."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"{target.mention} {random.choice(ROASTS)}", "🔥"))
 
 
-@bot.command(name="ship")
+@bot.hybrid_command(name="ship")
 async def ship(ctx: commands.Context, first: str, second: Optional[str] = None) -> None:
     """Ship two users. Usage: !ship @a @b"""
     a = first
@@ -1101,41 +1105,41 @@ async def ship(ctx: commands.Context, first: str, second: Optional[str] = None) 
     await ctx.send(embed=fun(f"{a} ❤️ {b}\n`{bar}` **{percent}%**\n{verdict}", "💘 Ship"))
 
 
-@bot.command(name="rate")
+@bot.hybrid_command(name="rate")
 async def rate(ctx: commands.Context, *, thing: str) -> None:
     """Rate anything out of 10."""
     score = seed("rate", thing) % 11
     await ctx.send(embed=fun(f"**{thing}** → **{score}/10**\n" + "⭐" * score, "📊 Rating"))
 
 
-@bot.command(name="iq")
+@bot.hybrid_command(name="iq")
 async def iq(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Totally scientific IQ test."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"🧠 **{target.display_name}**'s IQ: **{60 + seed('iq', target.id) % 85}**", "IQ"))
 
 
-@bot.command(name="gayrate", aliases=["gay"])
+@bot.hybrid_command(name="gayrate", aliases=["gay"])
 async def gayrate(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Silly 0-100 metric. All in good fun."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"🌈 **{target.display_name}** is **{seed('g', target.id) % 101}%** today.", "🌈"))
 
 
-@bot.command(name="reverse")
+@bot.hybrid_command(name="reverse")
 async def reverse(ctx: commands.Context, *, text: str) -> None:
     """Reverse your text."""
     await ctx.send(embed=fun(f"`{text[::-1][:1900]}`"))
 
 
-@bot.command(name="mock")
+@bot.hybrid_command(name="mock")
 async def mock(ctx: commands.Context, *, text: str) -> None:
     """sPoNgEbOb-ify your text."""
     out = "".join(c.upper() if i % 2 else c.lower() for i, c in enumerate(text))
     await ctx.send(embed=fun(f"`{out[:1900]}`"))
 
 
-@bot.command(name="emojify")
+@bot.hybrid_command(name="emojify")
 async def emojify(ctx: commands.Context, *, text: str) -> None:
     """Turn text into regional-indicator emoji letters."""
     out = []
@@ -1149,53 +1153,53 @@ async def emojify(ctx: commands.Context, *, text: str) -> None:
     await ctx.send(" ".join(out))
 
 
-@bot.command(name="clap")
+@bot.hybrid_command(name="clap")
 async def clap(ctx: commands.Context, *, text: str) -> None:
     """Add 👏 between words."""
     await ctx.send(" 👏 ".join(text.split())[:1900])
 
 
-@bot.command(name="scream")
+@bot.hybrid_command(name="scream")
 async def scream(ctx: commands.Context, *, text: str) -> None:
     """YELL YOUR TEXT."""
     await ctx.send(embed=fun(f"**{text.upper()}!!!**"))
 
 
-@bot.command(name="spoiler")
+@bot.hybrid_command(name="spoiler")
 async def spoiler(ctx: commands.Context, *, text: str) -> None:
     """Hide text behind a spoiler tag."""
     await ctx.send(f"||{text[:1900]}||")
 
 
-@bot.command(name="hug")
+@bot.hybrid_command(name="hug")
 async def hug(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Hug someone."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"🤗 **{ctx.author.display_name}** hugs **{target.display_name}**!"))
 
 
-@bot.command(name="pat")
+@bot.hybrid_command(name="pat")
 async def pat(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Pat someone on the head."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"👋 **{ctx.author.display_name}** pats **{target.display_name}**."))
 
 
-@bot.command(name="slap")
+@bot.hybrid_command(name="slap")
 async def slap(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Slap someone with a large fish."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"🐟 **{ctx.author.display_name}** slaps **{target.display_name}** with a trout."))
 
 
-@bot.command(name="highfive")
+@bot.hybrid_command(name="highfive")
 async def highfive(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """High five someone."""
     target = member or ctx.author
     await ctx.send(embed=fun(f"🙌 **{ctx.author.display_name}** high-fives **{target.display_name}**!"))
 
 
-@bot.command(name="slots")
+@bot.hybrid_command(name="slots")
 async def slots(ctx: commands.Context) -> None:
     """Spin the slot machine."""
     symbols = ["🍒", "🍋", "🔔", "⭐", "💎", "7️⃣"]
@@ -1209,7 +1213,7 @@ async def slots(ctx: commands.Context) -> None:
     await ctx.send(embed=fun(f"{' | '.join(result)}\n\n{verdict}", "🎰 Slots"))
 
 
-@bot.command(name="trivia")
+@bot.hybrid_command(name="trivia")
 async def trivia(ctx: commands.Context) -> None:
     """Answer a trivia question within 15 seconds."""
     questions = [
@@ -1239,20 +1243,20 @@ async def trivia(ctx: commands.Context) -> None:
         await msg.reply(embed=err(f"❌ Not quite. The answer was **{answer}**."))
 
 
-@bot.command(name="riddle")
+@bot.hybrid_command(name="riddle")
 async def riddle(ctx: commands.Context) -> None:
     """Give a riddle with the answer hidden in a spoiler."""
     q, a = random.choice(RIDDLES)
     await ctx.send(embed=fun(f"{q}\n\nAnswer: ||{a}||", "🧩 Riddle"))
 
 
-@bot.command(name="fortune")
+@bot.hybrid_command(name="fortune")
 async def fortune(ctx: commands.Context) -> None:
     """Open a fortune cookie."""
     await ctx.send(embed=fun(f"🥠 {random.choice(FORTUNES)}", "Fortune"))
 
 
-@bot.command(name="numberbetween", aliases=["guess"])
+@bot.hybrid_command(name="numberbetween", aliases=["guess"])
 async def numberbetween(ctx: commands.Context, low: int = 1, high: int = 10) -> None:
     """Guess a number between two values in 10 seconds."""
     if low > high:
@@ -1282,7 +1286,7 @@ async def numberbetween(ctx: commands.Context, low: int = 1, high: int = 10) -> 
         await msg.reply(embed=err(f"Nope — it was **{secret}**."))
 
 
-@bot.command(name="bofh", aliases=["excuse"])
+@bot.hybrid_command(name="bofh", aliases=["excuse"])
 async def bofh(ctx: commands.Context) -> None:
     """Random tech excuse."""
     excuses = [
@@ -1298,32 +1302,32 @@ async def bofh(ctx: commands.Context) -> None:
     await ctx.send(embed=fun(random.choice(excuses), "🧑‍💻 Excuse"))
 
 
-@bot.command(name="owo")
+@bot.hybrid_command(name="owo")
 async def owo(ctx: commands.Context, *, text: str = "hello") -> None:
     """owo-ify text."""
     table = str.maketrans({"l": "w", "r": "w", "L": "W", "R": "W"})
     await ctx.send(embed=fun(f"{text.translate(table)} owo"))
 
 
-@bot.command(name="tableflip")
+@bot.hybrid_command(name="tableflip")
 async def tableflip(ctx: commands.Context) -> None:
     """(╯°□°）╯︵ ┻━┻"""
     await ctx.send("(╯°□°）╯︵ ┻━┻")
 
 
-@bot.command(name="unflip")
+@bot.hybrid_command(name="unflip")
 async def unflip(ctx: commands.Context) -> None:
     """┬─┬ ノ( ゜-゜ノ)"""
     await ctx.send("┬─┬ ノ( ゜-゜ノ)")
 
 
-@bot.command(name="lenny")
+@bot.hybrid_command(name="lenny")
 async def lenny(ctx: commands.Context) -> None:
     """( ͡° ͜ʖ ͡°)"""
     await ctx.send("( ͡° ͜ʖ ͡°)")
 
 
-@bot.command(name="vibecheck")
+@bot.hybrid_command(name="vibecheck")
 async def vibecheck(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Check someone's vibes."""
     target = member or ctx.author
@@ -1358,7 +1362,7 @@ def find_mentions(text: str) -> list[str]:
     return [m.group(0) for m in WATCH_PATTERN.finditer(text)]
 
 
-@bot.command(name="notify")
+@bot.hybrid_command(name="notify")
 async def notify(ctx: commands.Context, *, text: Optional[str] = None) -> None:
     """DM the owner when your message contains @themasteroogway_."""
     if not text:
@@ -1403,13 +1407,14 @@ async def notify(ctx: commands.Context, *, text: Optional[str] = None) -> None:
             await log_action(ctx.guild, f"Unsent notify from {ctx.author}: {text}")
         return
     try:
-        await ctx.message.add_reaction("📩")
+        if ctx.message is not None:
+            await ctx.message.add_reaction("📩")
     except Exception:
         pass
     await ctx.send(embed=ok("Sent to the owner's DMs 📩"))
 
 
-@bot.command(name="watched")
+@bot.hybrid_command(name="watched")
 async def watched(ctx: commands.Context) -> None:
     """Show which handle triggers a DM."""
     await ctx.send(embed=info(f"Watching for: `{WATCH_HANDLE}`\nAny spelling works — "
@@ -1542,7 +1547,7 @@ class GiveawayView(discord.ui.View):
             pass
 
 
-@bot.command(name="gstart", aliases=["giveaway"], usage="<time> <winners> <prize>")
+@bot.hybrid_command(name="gstart", aliases=["giveaway"], usage="<time> <winners> <prize>")
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def gstart(ctx: commands.Context, duration: str, winners: int, *, prize: str) -> None:
@@ -1579,7 +1584,7 @@ async def gstart(ctx: commands.Context, duration: str, winners: int, *, prize: s
     )
 
 
-@bot.command(name="gend", aliases=["giveawayend"])
+@bot.hybrid_command(name="gend", aliases=["giveawayend"])
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def gend(ctx: commands.Context, message_id: Optional[int] = None) -> None:
@@ -1595,7 +1600,7 @@ async def gend(ctx: commands.Context, message_id: Optional[int] = None) -> None:
     await ctx.send(embed=ok(f"Ended **{gw.prize}** — {len(gw.winners)} winner(s) picked."))
 
 
-@bot.command(name="greroll", aliases=["giveawayreroll"])
+@bot.hybrid_command(name="greroll", aliases=["giveawayreroll"])
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def greroll(ctx: commands.Context, message_id: Optional[int] = None) -> None:
@@ -1638,7 +1643,7 @@ def _find_giveaway(ctx: commands.Context, message_id: Optional[int]) -> Optional
     return None
 
 
-@bot.command(name="gentries", aliases=["glist"])
+@bot.hybrid_command(name="gentries", aliases=["glist"])
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def gentries(ctx: commands.Context, message_id: Optional[int] = None) -> None:
@@ -1935,7 +1940,7 @@ class TicketPanelView(discord.ui.View):
         await log_action(guild, f"{interaction.user} opened ticket {channel.mention} ({open_ticket_count(guild.id)} open now)")
 
 
-@bot.command(name="ticketpanel", aliases=["tpanel", "ticket"])
+@bot.hybrid_command(name="ticketpanel", aliases=["tpanel", "ticket"])
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 @commands.bot_has_permissions(manage_channels=True)
@@ -1956,7 +1961,7 @@ async def ticketpanel(ctx: commands.Context) -> None:
     await ctx.send(embed=ok("Ticket panel posted."), delete_after=5)
 
 
-@bot.command(name="tclose", aliases=["closeticket"])
+@bot.hybrid_command(name="tclose", aliases=["closeticket"])
 @commands.guild_only()
 async def tclose(ctx: commands.Context) -> None:
     """Close the current ticket channel (saves a transcript first)."""
@@ -1969,7 +1974,7 @@ async def tclose(ctx: commands.Context) -> None:
     await close_ticket(ctx.channel, ctx.author)
 
 
-@bot.command(name="tlist", aliases=["tickets"])
+@bot.hybrid_command(name="tlist", aliases=["tickets"])
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 async def tlist(ctx: commands.Context) -> None:
@@ -1997,7 +2002,7 @@ async def tlist(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-@bot.command(name="tclaim")
+@bot.hybrid_command(name="tclaim")
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 async def tclaim(ctx: commands.Context) -> None:
@@ -2021,7 +2026,7 @@ async def tclaim(ctx: commands.Context) -> None:
     await ctx.send(embed=ok(f"{ctx.author.mention} is handling this ticket.", "🎯 Claimed"))
 
 
-@bot.command(name="tadd")
+@bot.hybrid_command(name="tadd")
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 async def tadd(ctx: commands.Context, member: discord.Member) -> None:
@@ -2035,7 +2040,7 @@ async def tadd(ctx: commands.Context, member: discord.Member) -> None:
     await ctx.send(embed=ok(f"Added {member.mention} to this ticket."))
 
 
-@bot.command(name="tremove")
+@bot.hybrid_command(name="tremove")
 @commands.guild_only()
 @commands.has_permissions(manage_channels=True)
 async def tremove(ctx: commands.Context, member: discord.Member) -> None:
@@ -2219,7 +2224,7 @@ async def _resume_giveaway(gw: Giveaway) -> None:
     await _gw_timer(gw)
 
 
-@bot.command(name="datainfo", aliases=["dbinfo"])
+@bot.hybrid_command(name="datainfo", aliases=["dbinfo"])
 @commands.guild_only()
 @commands.has_permissions(administrator=True)
 async def datainfo(ctx: commands.Context) -> None:
@@ -2273,7 +2278,7 @@ REQUIRED_PERMS: dict[str, str] = {
 }
 
 
-@bot.command(name="permcheck", aliases=["setup", "perms"])
+@bot.hybrid_command(name="permcheck", aliases=["setup", "perms"])
 @commands.guild_only()
 async def permcheck(ctx: commands.Context) -> None:
     """Check whether the bot has the permissions it needs on this server."""
@@ -2372,7 +2377,7 @@ async def on_message(message: discord.Message) -> None:
     await bot.process_commands(message)
 
 
-@bot.command(name="echoslash")
+@bot.hybrid_command(name="echoslash")
 async def echoslash(ctx: commands.Context, *, text: str = "hello") -> None:
     """Simple echo, handy for testing the prefix works."""
     await ctx.reply(text, mention_author=False)
@@ -2414,6 +2419,16 @@ async def on_command_error(ctx: commands.Context, error: Exception) -> None:
 # ===========================================================================
 # HELP CATEGORIES  (also used by !help — keep names in sync with @bot.command)
 # ===========================================================================
+
+# Slash commands show the description to users, so strip the "Usage: !cmd ..."
+# hint that only makes sense for the prefix version. The prefix help still
+# shows it, because that reads from cmd.help rather than the app command.
+for _cmd in bot.commands:
+    _app = getattr(_cmd, "app_command", None)
+    _desc = getattr(_app, "description", "") or ""
+    if " Usage: !" in _desc:
+        _app.description = _desc.split(" Usage: !")[0].strip()
+
 
 CATEGORIES: dict[str, list[str]] = {
     "🔧 Core": ["help", "ping", "botinfo", "uptime", "invite", "membercount", "permcheck", "datainfo", "echoslash"],

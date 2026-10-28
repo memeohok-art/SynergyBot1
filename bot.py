@@ -2360,7 +2360,8 @@ async def eco_group(ctx: commands.Context) -> None:
     you = _eco(ctx.author.id)
     await ctx.send(embed=fun(
         f"You have {_coins(you['bal'])}\n\n"
-        f"`{PREFIX}eco profile` · `{PREFIX}eco daily` · `{PREFIX}eco work` · `{PREFIX}eco balance`\n"
+        f"`{PREFIX}eco profile` · `{PREFIX}eco stats` · `{PREFIX}eco daily` · `{PREFIX}eco work`\n"
+        f"`{PREFIX}eco balance`\n"
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
         f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
         f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco dailyshop` · `{PREFIX}eco buy <item>`\n"
@@ -2575,6 +2576,88 @@ async def eco_profile(ctx: commands.Context, member: Optional[discord.Member] = 
     embed.add_field(name="✨ Active buffs", value=active[:1024], inline=False)
 
     embed.set_footer(text=f"!eco shop · !eco use <item> · !eco daily")
+    await ctx.send(embed=embed)
+
+
+ECO_MIN_SAMPLE = 3          # attempts needed before a win rate is ranked
+
+
+def _board_earned(limit: int) -> list[tuple[str, str]]:
+    rows = sorted(
+        ((uid, w.get("earned", 0)) for uid, w in ECONOMY.items()),
+        key=lambda r: -r[1],
+    )
+    return [(uid, f"{v:,} coins") for uid, v in rows if v > 0][:limit]
+
+
+def _board_rate(kind: str, limit: int) -> list[tuple[str, str]]:
+    wins_key, total_key = (
+        ("gamble_wins", "gambles") if kind == "gamble" else ("rob_wins", "robs")
+    )
+    rows = []
+    for uid, w in ECONOMY.items():
+        total = w.get(total_key, 0)
+        if total < ECO_MIN_SAMPLE:
+            continue
+        wins = w.get(wins_key, 0)
+        rows.append((uid, wins, total))
+    rows.sort(key=lambda r: (-(r[1] / r[2]), -r[2]))
+    return [(uid, f"{w / t * 100:.1f}% ({w}/{t})") for uid, w, t in rows][:limit]
+
+
+def _render_board(title: str, rows: list[tuple[str, str]], empty: str) -> str:
+    if not rows:
+        return empty
+    medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+    return "\n".join(
+        f"{medals.get(i, f'`{i}.`')} <@{uid}> — {value}"
+        for i, (uid, value) in enumerate(rows, 1)
+    )
+
+
+@eco_group.command(name="stats", description="Top members by earnings and win rates")
+async def eco_stats(ctx: commands.Context, board: Optional[str] = None) -> None:
+    """Rankings. Usage: !eco stats  /  !eco stats earned|gamble|rob"""
+    picked = (_core(board) or "").lower() if board else ""
+
+    names = {"earned": "earned", "gamble": "gamble", "rob": "rob"}
+    if picked:
+        match = next((v for k, v in names.items() if k.startswith(picked)), None)
+        if match is None and picked != "earned":
+            await ctx.send(embed=err(
+                f"Unknown board `{board}`. Try `earned`, `gamble` or `rob`."
+            ))
+            return
+        picked = match or "earned"
+
+    title = "📊 Economy rankings"
+    embed = fun("", title)
+
+    if picked == "earned" or not picked:
+        embed.add_field(
+            name="💰 Total earned",
+            value=_render_board("earned", _board_earned(10 if picked else 5),
+                                "nobody has earned coins yet"),
+            inline=False,
+        )
+    if picked == "gamble" or not picked:
+        embed.add_field(
+            name="🎲 Gamble win rate",
+            value=_render_board("gamble", _board_rate("gamble", 10 if picked else 5),
+                                f"nobody has played {ECO_MIN_SAMPLE}+ gambles yet"),
+            inline=False,
+        )
+    if picked == "rob" or not picked:
+        embed.add_field(
+            name="🕵️ Rob win rate",
+            value=_render_board("rob", _board_rate("rob", 10 if picked else 5),
+                                f"nobody has made {ECO_MIN_SAMPLE}+ robbery attempts yet"),
+            inline=False,
+        )
+
+    embed.set_footer(
+        text=f"Win rates need {ECO_MIN_SAMPLE}+ attempts to rank  •  {PREFIX}eco stats earned|gamble|rob"
+    )
     await ctx.send(embed=embed)
 
 
@@ -3831,7 +3914,8 @@ CATEGORIES: dict[str, list[str]] = {
     ],
     "🪙 Economy": [
         "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
-        "eco profile", "eco rob", "eco leaderboard", "eco weekly", "eco shop", "eco dailyshop",
+        "eco profile", "eco stats", "eco rob", "eco leaderboard", "eco weekly",
+    "eco shop", "eco dailyshop",
         "eco buy", "eco inventory", "eco use", "eco sell", "eco gift", "eco auction",
         "eco bid", "eco trade", "eco tradeadd", "eco tradecoins",
         "eco tradeconfirm", "eco tradecancel",

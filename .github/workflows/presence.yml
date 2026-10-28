@@ -1,0 +1,29 @@
+name: synergy-presence
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: synergy-presence
+  cancel-in-progress: true
+
+jobs:
+  presence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install discord.js
+        run: npm install discord.js@14 --no-audit --no-fund
+
+      - name: Hold the gateway connection
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: node presence.js

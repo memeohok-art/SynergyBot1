@@ -3583,6 +3583,12 @@ async def shop_shortcut(ctx: commands.Context) -> None:
     await eco_shop.callback(ctx)          # type: ignore[union-attr]
 
 
+@bot.command(name="wallet", aliases=["bal"])
+async def wallet_shortcut(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """Shortcut for !eco balance — shows a wallet."""
+    await eco_balance.callback(ctx, member)   # type: ignore[union-attr]
+
+
 @bot.hybrid_command(name="inv", description="Shortcut for your inventory")
 async def inv_shortcut(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Shortcut for !market inventory."""
@@ -4093,7 +4099,7 @@ CATEGORIES: dict[str, list[str]] = {
         "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
     ],
     "🛒 Market": [
-        "shop", "inv",
+        "wallet", "shop", "inv",
         "market shop", "market dailyshop", "market buy", "market sell",
         "market sellall", "market restock", "market auction", "market bid",
         "market inventory", "market use", "market gift", "market trade",

@@ -2067,11 +2067,24 @@ ECO_WORK_COOLDOWN = 3600
 ECO_ROB_COOLDOWN = 300
 
 
+ECO_DEFAULTS: dict = {
+    "bal": ECO_START,
+    "daily": 0.0, "weekly": 0.0, "work": 0.0, "rob": 0.0,
+    # lifetime stats, shown by !eco profile
+    "earned": 0, "gambles": 0, "gamble_wins": 0, "robs": 0, "rob_wins": 0,
+}
+
+
 def _eco(user_id: int) -> dict:
     key = str(user_id)
-    if key not in ECONOMY:
-        ECONOMY[key] = {"bal": ECO_START, "daily": 0.0, "weekly": 0.0, "work": 0.0, "rob": 0.0}
-    return ECONOMY[key]
+    wallet = ECONOMY.get(key)
+    if wallet is None:
+        ECONOMY[key] = dict(ECO_DEFAULTS)
+        return ECONOMY[key]
+    # migrate wallets saved before the stats existed
+    for field, default in ECO_DEFAULTS.items():
+        wallet.setdefault(field, default)
+    return wallet
 
 
 def _coins(n: int) -> str:
@@ -2347,7 +2360,7 @@ async def eco_group(ctx: commands.Context) -> None:
     you = _eco(ctx.author.id)
     await ctx.send(embed=fun(
         f"You have {_coins(you['bal'])}\n\n"
-        f"`{PREFIX}eco daily` · `{PREFIX}eco work` · `{PREFIX}eco balance`\n"
+        f"`{PREFIX}eco profile` · `{PREFIX}eco daily` · `{PREFIX}eco work` · `{PREFIX}eco balance`\n"
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
         f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
         f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco dailyshop` · `{PREFIX}eco buy <item>`\n"
@@ -2376,6 +2389,7 @@ async def eco_daily(ctx: commands.Context) -> None:
         return
     you["daily"] = time.time()
     you["bal"] += ECO_DAILY
+    you["earned"] = you.get("earned", 0) + ECO_DAILY
     save_data()
     await ctx.send(embed=ok(f"+{_coins(ECO_DAILY)} — you now have {_coins(you['bal'])}", "💰 Daily"))
 
@@ -2395,6 +2409,7 @@ async def eco_work(ctx: commands.Context) -> None:
         earned *= 2
     you["work"] = time.time()
     you["bal"] += earned
+    you["earned"] = you.get("earned", 0) + earned
     save_data()
     jobs = ["streamed for an hour", "edited a thumbnail", "moderated chat", "wrote a script",
             "answered support tickets", "uploaded a short"]
@@ -2413,8 +2428,11 @@ async def eco_gamble(ctx: commands.Context, amount: int) -> None:
         await ctx.send(embed=err(f"You only have {_coins(you['bal'])}."))
         return
     chance = 0.47 + (0.07 if _owned(ctx.author.id, "lucky") else 0.0)
+    you["gambles"] = you.get("gambles", 0) + 1
     if random.random() < chance:
         you["bal"] += amount
+        you["gamble_wins"] = you.get("gamble_wins", 0) + 1
+        you["earned"] = you.get("earned", 0) + amount
         result = f"🎉 You won **{amount}** coins! Balance: {_coins(you['bal'])}"
         emb, ttl = ok(result, "🎲 Gamble"), None
     else:
@@ -2459,6 +2477,7 @@ async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
         await ctx.send(embed=err(f"Lay low for **{fmt_duration(wait)}**."))
         return
     thief["rob"] = time.time()
+    thief["robs"] = thief.get("robs", 0) + 1
     if victim["bal"] < 50:
         await ctx.send(embed=err(f"{member.mention} is broke. Have some mercy."))
         return
@@ -2483,6 +2502,8 @@ async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
     if random.random() < chance:
         thief["bal"] += stake
         victim["bal"] -= stake
+        thief["rob_wins"] = thief.get("rob_wins", 0) + 1
+        thief["earned"] = thief.get("earned", 0) + stake
         msg = f"🕵️ Success! You took **{stake}** coins from {member.mention}."
         emb = ok(msg, "🕵️ Robbery")
     else:
@@ -2492,6 +2513,69 @@ async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
         emb = err(f"🚨 Caught! You paid {member.mention} **{fine}** coins.", "🕵️ Robbery")
     save_data()
     await ctx.send(embed=emb)
+
+
+@eco_group.command(name="profile", description="Your full economy profile")
+async def eco_profile(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """Balance, inventory, buffs, lifetime earnings and win rates."""
+    target = member or ctx.author
+    wallet = _eco(target.id)
+    inv = _inv(target.id)
+    buffs = _buffs(target.id)
+
+    # rank among all wallets, richest first
+    ranked = sorted(ECONOMY.items(), key=lambda kv: kv[1].get("bal", 0), reverse=True)
+    rank = next((i for i, (uid, _) in enumerate(ranked, 1) if uid == str(target.id)), None)
+    rank_txt = f"#{rank} of {len(ranked)}" if rank else "—"
+
+    embed = discord.Embed(
+        title=f"🪙 {target.display_name}",
+        colour=COLOUR_FUN,
+    )
+    embed.set_thumbnail(url=target.display_avatar.url)
+
+    embed.add_field(name="Balance", value=f"{wallet['bal']:,} coins", inline=True)
+    embed.add_field(name="Total earned", value=f"{wallet.get('earned', 0):,} coins", inline=True)
+    embed.add_field(name="Rank", value=rank_txt, inline=True)
+
+    # gambling win rate
+    gambles = wallet.get("gambles", 0)
+    gwins = wallet.get("gamble_wins", 0)
+    if gambles:
+        rate = gwins / gambles * 100
+        gamble_txt = f"**{rate:.1f}%** ({gwins}/{gambles})"
+    else:
+        gamble_txt = "no games played"
+
+    # robbery win rate
+    robs = wallet.get("robs", 0)
+    rwins = wallet.get("rob_wins", 0)
+    rob_txt = f"**{rwins / robs * 100:.1f}%** ({rwins}/{robs})" if robs else "no attempts"
+
+    embed.add_field(name="🎲 Gamble win rate", value=gamble_txt, inline=True)
+    embed.add_field(name="🕵️ Rob win rate", value=rob_txt, inline=True)
+    embed.add_field(name="🎒 Items owned", value=str(sum(inv.values())), inline=True)
+
+    if inv:
+        items = " · ".join(
+            f"{SHOP[i]['emoji']} {SHOP[i]['name']} ×{n}"
+            for i, n in sorted(inv.items(), key=lambda kv: -kv[1]) if i in SHOP
+        )
+    else:
+        items = "nothing yet"
+    embed.add_field(name="Inventory", value=items[:1024], inline=False)
+
+    if buffs:
+        active = "\n".join(
+            f"{SHOP[i]['emoji']} {SHOP[i]['name']} — expires <t:{int(exp)}:R>"
+            for i, exp in sorted(buffs.items(), key=lambda kv: -kv[1]) if i in SHOP
+        )
+    else:
+        active = "none active"
+    embed.add_field(name="✨ Active buffs", value=active[:1024], inline=False)
+
+    embed.set_footer(text=f"!eco shop · !eco use <item> · !eco daily")
+    await ctx.send(embed=embed)
 
 
 @eco_group.command(name="leaderboard", description="Richest members")
@@ -2763,6 +2847,7 @@ async def eco_use(ctx: commands.Context, item: str) -> None:
     if iid == "chest":
         prize = random.randint(100, 900)
         wallet["bal"] += prize
+        wallet["earned"] = wallet.get("earned", 0) + prize
         _add_item(ctx.author.id, iid, -1)
         save_data()
         await ctx.send(embed=fun(
@@ -2977,6 +3062,7 @@ async def eco_weekly(ctx: commands.Context) -> None:
         return
     you["weekly"] = time.time()
     you["bal"] += ECO_WEEKLY
+    you["earned"] = you.get("earned", 0) + ECO_WEEKLY
     save_data()
     await ctx.send(embed=ok(
         f"+{_coins(ECO_WEEKLY)} — you now have {_coins(you['bal'])}", "📅 Weekly"
@@ -3408,6 +3494,11 @@ async def restore_state() -> None:
                 "weekly": float(data.get("weekly", 0.0)),
                 "work": float(data.get("work", 0.0)),
                 "rob": float(data.get("rob", 0.0)),
+                "earned": int(data.get("earned", 0)),
+                "gambles": int(data.get("gambles", 0)),
+                "gamble_wins": int(data.get("gamble_wins", 0)),
+                "robs": int(data.get("robs", 0)),
+                "rob_wins": int(data.get("rob_wins", 0)),
             }
             restored_eco += 1
         except Exception:
@@ -3740,7 +3831,7 @@ CATEGORIES: dict[str, list[str]] = {
     ],
     "🪙 Economy": [
         "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
-        "eco rob", "eco leaderboard", "eco weekly", "eco shop", "eco dailyshop",
+        "eco profile", "eco rob", "eco leaderboard", "eco weekly", "eco shop", "eco dailyshop",
         "eco buy", "eco inventory", "eco use", "eco sell", "eco gift", "eco auction",
         "eco bid", "eco trade", "eco tradeadd", "eco tradecoins",
         "eco tradeconfirm", "eco tradecancel",

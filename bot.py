@@ -3573,18 +3573,17 @@ async def eco_tradecancel(ctx: commands.Context) -> None:
 # ---------------------------------------------------------------------------
 # Short prefix shortcuts
 # ---------------------------------------------------------------------------
-# These are prefix-only on purpose: they cost ZERO of Discord's 100 top-level
-# slash slots, which are the scarce resource. The slash forms stay where they
-# are (/market shop, /market inventory).
+# Hybrid: both !shop and /shop work. Each costs one of Discord's 100 top-level
+# slash slots, and delegates to the real implementation in /market.
 
 
-@bot.command(name="shop")
+@bot.hybrid_command(name="shop", description="Shortcut for the market shop")
 async def shop_shortcut(ctx: commands.Context) -> None:
     """Shortcut for !market shop."""
     await eco_shop.callback(ctx)          # type: ignore[union-attr]
 
 
-@bot.command(name="inv")
+@bot.hybrid_command(name="inv", description="Shortcut for your inventory")
 async def inv_shortcut(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Shortcut for !market inventory."""
     await eco_inventory.callback(ctx, member)   # type: ignore[union-attr]

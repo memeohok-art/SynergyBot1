@@ -2053,6 +2053,435 @@ async def tremove(ctx: commands.Context, member: discord.Member) -> None:
 
 
 # ===========================================================================
+# 7b. EXTRA COMMAND GROUPS  (hybrid groups: !fun pun  AND  /fun pun)
+# ===========================================================================
+#
+# Why groups: Discord allows 100 top-level slash commands. The bot already uses
+# 93, so each new group is 1 slot and holds up to 25 subcommands.
+
+ECONOMY: dict[str, dict] = {}   # user_id -> {"bal": int, "daily": ts, "work": ts, "rob": ts}
+ECO_START = 100                 # starting balance for new users
+ECO_DAILY = 250
+ECO_DAILY_COOLDOWN = 24 * 3600
+ECO_WORK_COOLDOWN = 3600
+ECO_ROB_COOLDOWN = 300
+
+
+def _eco(user_id: int) -> dict:
+    key = str(user_id)
+    if key not in ECONOMY:
+        ECONOMY[key] = {"bal": ECO_START, "daily": 0.0, "work": 0.0, "rob": 0.0}
+    return ECONOMY[key]
+
+
+def _coins(n: int) -> str:
+    return f"🪙 **{n:,}**"
+
+
+@bot.hybrid_group(name="fun", description="Extra fun commands", invoke_without_command=True)
+async def fun_group(ctx: commands.Context) -> None:
+    """Extra fun and text toys."""
+    subs = sorted(
+        f"`{PREFIX}fun {c.name}`" for c in bot.get_command("fun").commands  # type: ignore[union-attr]
+    )
+    await ctx.send(embed=fun(" ".join(subs)[:3900], "🎲 Fun — subcommands"))
+
+
+PUNS = [
+    "I'm reading a book on anti-gravity. It's impossible to put down.",
+    "Time flies like an arrow. Fruit flies like a banana.",
+    "I used to be a banker, but I lost interest.",
+    "The past, present and future walked into a bar. It was tense.",
+    "Broken pencils are pointless.",
+    "I'm in a glass case of emotion.",
+    "Velcro — what a rip off.",
+]
+
+PICKUPS = [
+    "Are you a Wi-Fi signal? Because I'm feeling a connection.",
+    "Do you have a map? I keep getting lost in your eyes.",
+    "Are you a magician? Every time I look at you, everyone else disappears.",
+    "If you were a vegetable, you'd be a cute-cumber.",
+    "Are you French? Because Eiffel for you.",
+    "Is your name Google? Because you're exactly what I've been searching for.",
+]
+
+TRUTHS = [
+    "What's the most embarrassing thing you've searched for online?",
+    "Who in this server would you swap lives with for a week?",
+    "What's a lie you've told that you still feel guilty about?",
+    "What's the last thing you cried about?",
+    "What's your most irrational fear?",
+    "Whose profile picture have you stared at the longest?",
+    "What's the pettiest reason you've ever unfollowed someone?",
+]
+
+DARES = [
+    "Send the 5th photo in your camera roll, no editing.",
+    "Type your next 3 messages with your eyes closed.",
+    "Change your nickname to the last thing you ate.",
+    "Voice-note yourself singing the chorus of the last song you played.",
+    "Send a message to the 3rd person in your DMs saying 'it's done'.",
+    "Post the last emoji you used, explained in 10 words.",
+]
+
+WYR = [
+    ("Always be 10 minutes late", "Always be 20 minutes early"),
+    ("Have unlimited money but no friends", "Have great friends but no money"),
+    ("Never use social media again", "Never watch another video again"),
+    ("Only be able to whisper", "Only be able to shout"),
+    ("Read every mind for a day", "Be invisible for a day"),
+    ("Always have to sing instead of speak", "Always have to dance instead of walk"),
+]
+
+NEVERHAVE = [
+    "stayed up past 4am scrolling",
+    "pretended to be offline to avoid someone",
+    "sent a message to the wrong person",
+    "laughed so hard you cried",
+    "lied about your plans",
+    "sang in the shower at full volume",
+    "rewatched a whole series instead of sleeping",
+]
+
+HAIKU_LINES = {
+    "five": ["quiet autumn rain", "your voice in the dark", "cold coffee at noon",
+             "the last train home", "sky the colour of", "static on the screen"],
+    "seven": ["a thousand drafts I never sent", "the lamp hums a single note",
+              "someone else's playlist", "the moon does not check in",
+              "every tab is still open", "silence in the group chat grows"],
+}
+
+BINGO_ITEMS = [
+    "NFT shill", "self-promo", "good morning", "someone at 3am", "voice note",
+    "nitro gift", "mod ping", "edit dropped", "raid", "typo in announcements",
+    "link with no context", "typing... forever", "deleted message", "hot take",
+    "reply to old message", "new member", "cap", "real", "lmao", "ratio",
+    "emoji spam", "late night call", "soundboard", "lore post", "drama",
+]
+
+MORSE = {
+    "a": ".-", "b": "-...", "c": "-.-.", "d": "-..", "e": ".", "f": "..-.",
+    "g": "--.", "h": "....", "i": "..", "j": ".---", "k": "-.-", "l": ".-..",
+    "m": "--", "n": "-.", "o": "---", "p": ".--.", "q": "--.-", "r": ".-.",
+    "s": "...", "t": "-", "u": "..-", "v": "...-", "w": ".--", "x": "-..-",
+    "y": "-.--", "z": "--..", "0": "-----", "1": ".----", "2": "..---",
+    "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...",
+    "8": "---..", "9": "----.", ".": ".-.-.-", ",": "--..--", "?": "..--..",
+    "!": "-.-.--", " ": "/",
+}
+MORSE_REVERSE = {v: k for k, v in MORSE.items()}
+
+
+@fun_group.command(name="pun", description="A terrible pun")
+async def fun_pun(ctx: commands.Context) -> None:
+    """Get a pun."""
+    await ctx.send(embed=fun(random.choice(PUNS), "😅 Pun"))
+
+
+@fun_group.command(name="pickup", description="A pickup line")
+async def fun_pickup(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """Get a pickup line."""
+    line = random.choice(PICKUPS)
+    target = f"{member.mention} " if member else ""
+    await ctx.send(embed=fun(f"{target}{line}", "💘"))
+
+
+@fun_group.command(name="truth", description="A truth question")
+async def fun_truth(ctx: commands.Context) -> None:
+    """Truth question for truth-or-dare."""
+    await ctx.send(embed=fun(random.choice(TRUTHS), "🫢 Truth"))
+
+
+@fun_group.command(name="dare", description="A dare")
+async def fun_dare(ctx: commands.Context) -> None:
+    """Dare for truth-or-dare."""
+    await ctx.send(embed=fun(random.choice(DARES), "😈 Dare"))
+
+
+@fun_group.command(name="wyr", description="Would you rather...")
+async def fun_wyr(ctx: commands.Context) -> None:
+    """Would you rather — vote with reactions."""
+    a, b = random.choice(WYR)
+    msg = await ctx.send(embed=fun(f"🅰️ {a}\n\n🅱️ {b}", "🤔 Would you rather"))
+    try:
+        await msg.add_reaction("🅰️")
+        await msg.add_reaction("🅱️")
+    except Exception:
+        pass
+
+
+@fun_group.command(name="neverhave", description="Never have I ever...")
+async def fun_neverhave(ctx: commands.Context) -> None:
+    """Never have I ever."""
+    await ctx.send(embed=fun(f"Never have I ever **{random.choice(NEVERHAVE)}**.", "🙈"))
+
+
+@fun_group.command(name="haiku", description="Generate a haiku")
+async def fun_haiku(ctx: commands.Context) -> None:
+    """Generate a 5-7-5 haiku."""
+    five = random.sample(HAIKU_LINES["five"], 2)
+    seven = random.choice(HAIKU_LINES["seven"])
+    text = f"{five[0]}\n{seven}\n{five[1]}"
+    await ctx.send(embed=fun(f"*{text}*", "🍃 Haiku"))
+
+
+@fun_group.command(name="story", description="Generate a tiny story")
+async def fun_story(ctx: commands.Context, *, name: str = "someone") -> None:
+    """Mad-libs style micro story."""
+    name = name[:40]
+    templates = [
+        "{n} opened the door and the room was already on fire. Nobody had lit it.",
+        "{n} said \"one more video\" at 11pm. The sun disagreed.",
+        "The last message from {n} was a single period. Everyone noticed.",
+        "{n} typed for four minutes, then sent \"ok\".",
+        "{n} found the server's oldest message and immediately regretted it.",
+    ]
+    await ctx.send(embed=fun(random.choice(templates).format(n=name), "📖 Micro story"))
+
+
+@fun_group.command(name="bingo", description="Random bingo card")
+async def fun_bingo(ctx: commands.Context) -> None:
+    """Server bingo card."""
+    picks = random.sample(BINGO_ITEMS, 9)
+    grid = "\n".join(
+        " · ".join(f"{p[:14]:14}" for p in picks[i:i + 3]) for i in (0, 3, 6)
+    )
+    await ctx.send(embed=fun(f"```\n{grid}\n```", "🎯 Bingo card"))
+
+
+@fun_group.command(name="anagram", description="Scramble a word")
+async def fun_anagram(ctx: commands.Context, *, word: str) -> None:
+    """Scramble a word."""
+    word = word.strip()[:30]
+    if len(word) < 2:
+        await ctx.send(embed=err("Give me a word with at least 2 letters."))
+        return
+    letters = list(word)
+    for _ in range(10):
+        random.shuffle(letters)
+        if "".join(letters) != word:
+            break
+    await ctx.send(embed=fun(f"`{''.join(letters)}`", "🔀 Anagram"))
+
+
+@fun_group.command(name="caesar", description="Caesar-shift text")
+async def fun_caesar(ctx: commands.Context, shift: int, *, text: str) -> None:
+    """Shift letters by N. Usage: !fun caesar 3 hello"""
+    shift %= 26
+    out = []
+    for ch in text[:500]:
+        if ch.isupper():
+            out.append(chr((ord(ch) - 65 + shift) % 26 + 65))
+        elif ch.islower():
+            out.append(chr((ord(ch) - 97 + shift) % 26 + 97))
+        else:
+            out.append(ch)
+    await ctx.send(embed=fun(f"Shift **{shift}**\n```{''.join(out)}```", "🔐 Caesar"))
+
+
+@fun_group.command(name="morse", description="Morse encode or decode")
+async def fun_morse(ctx: commands.Context, mode: str, *, text: str) -> None:
+    """Usage: !fun morse encode sos  /  !fun morse decode ... --- ..."""
+    if mode.lower().startswith("e"):
+        out = " ".join(MORSE.get(c, c) for c in text.lower())[:1500]
+    elif mode.lower().startswith("d"):
+        parts = text.replace("/", " / ").split()
+        out = "".join(MORSE_REVERSE.get(p, "?" if p != "/" else " ") for p in parts)[:1500]
+    else:
+        await ctx.send(embed=err("Use `encode` or `decode`."))
+        return
+    await ctx.send(embed=fun(f"```{out}```", "📡 Morse"))
+
+
+@fun_group.command(name="binary", description="Text to binary or back")
+async def fun_binary(ctx: commands.Context, mode: str, *, text: str) -> None:
+    """Usage: !fun binary encode hi  /  !fun binary decode 01101000 01101001"""
+    if mode.lower().startswith("e"):
+        out = " ".join(f"{ord(c):08b}" for c in text[:200])
+    elif mode.lower().startswith("d"):
+        try:
+            out = "".join(chr(int(b, 2)) for b in text.split()[:200] if b)
+        except ValueError:
+            await ctx.send(embed=err("That isn't valid binary."))
+            return
+    else:
+        await ctx.send(embed=err("Use `encode` or `decode`."))
+        return
+    await ctx.send(embed=fun(f"```{out[:1500]}```", "💻 Binary"))
+
+
+@fun_group.command(name="color", description="Random colour")
+async def fun_color(ctx: commands.Context) -> None:
+    """Random hex colour."""
+    hexv = f"{random.randint(0, 0xFFFFFF):06X}"
+    embed = discord.Embed(title=f"#{hexv}", description=f"rgb({int(hexv[0:2],16)}, {int(hexv[2:4],16)}, {int(hexv[4:6],16)})",
+                          colour=int(hexv, 16))
+    await ctx.send(embed=embed)
+
+
+@fun_group.command(name="countdown", description="Days until a date (YYYY-MM-DD)")
+async def fun_countdown(ctx: commands.Context, date: str, *, label: str = "") -> None:
+    """Count down to a date. Usage: !fun countdown 2027-01-01 New year"""
+    from datetime import datetime, timezone
+    try:
+        target = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        await ctx.send(embed=err("Use `YYYY-MM-DD`, e.g. `2027-01-01`."))
+        return
+    delta = (target - datetime.now(timezone.utc)).days
+    if delta > 0:
+        body = f"**{delta}** days until **{target:%d %b %Y}**"
+    elif delta == 0:
+        body = f"That's **today** — {target:%d %b %Y}"
+    else:
+        body = f"That was **{abs(delta)}** days ago ({target:%d %b %Y})"
+    if label:
+        body += f"\n*{label[:100]}*"
+    await ctx.send(embed=fun(body, "📅 Countdown"))
+
+
+@bot.hybrid_group(name="eco", description="Economy commands", invoke_without_command=True)
+async def eco_group(ctx: commands.Context) -> None:
+    """Coins, work, gambling. Anyone can play."""
+    you = _eco(ctx.author.id)
+    await ctx.send(embed=fun(
+        f"You have {_coins(you['bal'])}\n\n"
+        f"`{PREFIX}eco daily` · `{PREFIX}eco work` · `{PREFIX}eco balance`\n"
+        f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
+        f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`",
+        "🪙 Economy",
+    ))
+
+
+@eco_group.command(name="balance", description="Check your coins")
+async def eco_balance(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """Show a balance."""
+    target = member or ctx.author
+    await ctx.send(embed=fun(f"{target.mention} has {_coins(_eco(target.id)['bal'])}", "🪙 Balance"))
+
+
+@eco_group.command(name="daily", description="Claim your daily coins")
+async def eco_daily(ctx: commands.Context) -> None:
+    """Claim once every 24 hours."""
+    you = _eco(ctx.author.id)
+    wait = ECO_DAILY_COOLDOWN - (time.time() - you["daily"])
+    if wait > 0:
+        await ctx.send(embed=err(f"Already claimed. Come back in **{fmt_duration(wait)}**."))
+        return
+    you["daily"] = time.time()
+    you["bal"] += ECO_DAILY
+    save_data()
+    await ctx.send(embed=ok(f"+{_coins(ECO_DAILY)} — you now have {_coins(you['bal'])}", "💰 Daily"))
+
+
+@eco_group.command(name="work", description="Work for coins")
+async def eco_work(ctx: commands.Context) -> None:
+    """Earn 40–120 coins hourly."""
+    you = _eco(ctx.author.id)
+    wait = ECO_WORK_COOLDOWN - (time.time() - you["work"])
+    if wait > 0:
+        await ctx.send(embed=err(f"You're tired. Rest **{fmt_duration(wait)}**."))
+        return
+    earned = random.randint(40, 120)
+    you["work"] = time.time()
+    you["bal"] += earned
+    save_data()
+    jobs = ["streamed for an hour", "edited a thumbnail", "moderated chat", "wrote a script",
+            "answered support tickets", "uploaded a short"]
+    await ctx.send(embed=ok(f"You {random.choice(jobs)} and earned **{earned}** coins.\n"
+                            f"Balance: {_coins(you['bal'])}", "💼 Work"))
+
+
+@eco_group.command(name="gamble", description="Bet your coins")
+async def eco_gamble(ctx: commands.Context, amount: int) -> None:
+    """50/50 double or nothing."""
+    you = _eco(ctx.author.id)
+    if amount < 1:
+        await ctx.send(embed=err("Bet at least 1 coin."))
+        return
+    if amount > you["bal"]:
+        await ctx.send(embed=err(f"You only have {_coins(you['bal'])}."))
+        return
+    if random.random() < 0.47:
+        you["bal"] += amount
+        result = f"🎉 You won **{amount}** coins! Balance: {_coins(you['bal'])}"
+        emb, ttl = ok(result, "🎲 Gamble"), None
+    else:
+        you["bal"] -= amount
+        emb = err(f"💸 You lost **{amount}** coins. Balance: {_coins(you['bal'])}", "🎲 Gamble")
+    save_data()
+    await ctx.send(embed=emb)
+
+
+@eco_group.command(name="pay", description="Send coins to someone")
+async def eco_pay(ctx: commands.Context, member: discord.Member, amount: int) -> None:
+    """Transfer coins."""
+    if member.bot:
+        await ctx.send(embed=err("Bots don't need coins."))
+        return
+    if member.id == ctx.author.id:
+        await ctx.send(embed=err("You can't pay yourself."))
+        return
+    sender, receiver = _eco(ctx.author.id), _eco(member.id)
+    if amount < 1:
+        await ctx.send(embed=err("Send at least 1 coin."))
+        return
+    if amount > sender["bal"]:
+        await ctx.send(embed=err(f"You only have {_coins(sender['bal'])}."))
+        return
+    sender["bal"] -= amount
+    receiver["bal"] += amount
+    save_data()
+    await ctx.send(embed=ok(f"Sent **{amount}** coins to {member.mention}.\n"
+                            f"Your balance: {_coins(sender['bal'])}", "💸 Payment"))
+
+
+@eco_group.command(name="rob", description="Try to rob someone")
+async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
+    """Risky: steal 10-25% of their coins."""
+    if member.bot or member.id == ctx.author.id:
+        await ctx.send(embed=err("Pick a real person."))
+        return
+    thief, victim = _eco(ctx.author.id), _eco(member.id)
+    wait = ECO_ROB_COOLDOWN - (time.time() - thief["rob"])
+    if wait > 0:
+        await ctx.send(embed=err(f"Lay low for **{fmt_duration(wait)}**."))
+        return
+    thief["rob"] = time.time()
+    if victim["bal"] < 50:
+        await ctx.send(embed=err(f"{member.mention} is broke. Have some mercy."))
+        return
+    stake = max(1, int(victim["bal"] * random.uniform(0.10, 0.25)))
+    if random.random() < 0.35:
+        thief["bal"] += stake
+        victim["bal"] -= stake
+        msg = f"🕵️ Success! You took **{stake}** coins from {member.mention}."
+        emb = ok(msg, "🕵️ Robbery")
+    else:
+        fine = min(thief["bal"], max(1, int(stake * 0.5)))
+        thief["bal"] -= fine
+        victim["bal"] += fine
+        emb = err(f"🚨 Caught! You paid {member.mention} **{fine}** coins.", "🕵️ Robbery")
+    save_data()
+    await ctx.send(embed=emb)
+
+
+@eco_group.command(name="leaderboard", description="Richest members")
+async def eco_leaderboard(ctx: commands.Context) -> None:
+    """Top 10 by balance."""
+    rows = sorted(ECONOMY.items(), key=lambda kv: kv[1]["bal"], reverse=True)[:10]
+    if not rows:
+        await ctx.send(embed=info("Nobody has coins yet. Try `!eco daily`."))
+        return
+    lines = []
+    for i, (uid, data) in enumerate(rows, 1):
+        medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"`{i}.`")
+        lines.append(f"{medal} <@{uid}> — {data['bal']:,}")
+    await ctx.send(embed=fun("\n".join(lines), "🏆 Richest members"))
+
+
+# ===========================================================================
 # 8. PERSISTENCE  (warnings + giveaways survive restarts)
 # ===========================================================================
 
@@ -2102,6 +2531,7 @@ def _serialize() -> dict:
             }
             for gw in keep
         },
+        "economy": {uid: data for uid, data in ECONOMY.items() if data.get("bal") or data.get("daily")},
         "tickets": {
             str(t.channel_id): {
                 "channel_id": t.channel_id,
@@ -2192,6 +2622,19 @@ async def restore_state() -> None:
         GIVEAWAYS[gw.message_id] = gw
         restored_gw += 1
 
+    restored_eco = 0
+    for uid, data in (raw.get("economy") or {}).items():
+        try:
+            ECONOMY[str(uid)] = {
+                "bal": int(data.get("bal", ECO_START)),
+                "daily": float(data.get("daily", 0.0)),
+                "work": float(data.get("work", 0.0)),
+                "rob": float(data.get("rob", 0.0)),
+            }
+            restored_eco += 1
+        except Exception:
+            continue
+
     restored_tickets = 0
     for _cid, t in (raw.get("tickets") or {}).items():
         try:
@@ -2211,8 +2654,11 @@ async def restore_state() -> None:
         restored_tickets += 1
 
     active = [g for g in GIVEAWAYS.values() if not g.ended]
-    print(f"Restored {restored_warnings} warning record(s), {restored_gw} giveaway(s) "
-          f"({len(active)} still running) and {restored_tickets} ticket(s) from {DATA_FILE}.")
+    print(
+        f"Restored {restored_warnings} warning record(s), {restored_gw} giveaway(s) "
+        f"({len(active)} still running), {restored_tickets} ticket(s) "
+        f"and {restored_eco} wallet(s) from {DATA_FILE}."
+    )
 
     for gw in active:
         # Give the gateway a moment before fetching old messages
@@ -2452,6 +2898,15 @@ CATEGORIES: dict[str, list[str]] = {
     f"📩 {WATCH_HANDLE}": ["notify", "watched"],
     "🎁 Giveaways": ["gstart", "gend", "greroll", "gentries"],
     "🎫 Tickets": ["ticketpanel", "tlist", "tclaim", "tclose", "tadd", "tremove"],
+    "🎲 Fun extras": [
+        "fun pun", "fun pickup", "fun truth", "fun dare", "fun wyr", "fun neverhave",
+        "fun haiku", "fun story", "fun bingo", "fun anagram", "fun caesar",
+        "fun morse", "fun binary", "fun color", "fun countdown",
+    ],
+    "🪙 Economy": [
+        "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
+        "eco rob", "eco leaderboard",
+    ],
 }
 
 

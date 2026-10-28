@@ -1,0 +1,11 @@
+{
+  "name": "synergy-github",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Free GitHub-hosted pieces of Synergy: Discord presence keeper + dashboard on Pages.",
+  "scripts": {
+    "presence": "node presence.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": { "discord.js": "^14.27.0" }
+}

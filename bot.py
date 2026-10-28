@@ -2349,7 +2349,9 @@ async def eco_group(ctx: commands.Context) -> None:
         f"You have {_coins(you['bal'])}\n\n"
         f"`{PREFIX}eco daily` · `{PREFIX}eco work` · `{PREFIX}eco balance`\n"
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
-        f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`",
+        f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
+        f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco buy <item>` · `{PREFIX}eco inventory`\n"
+        f"`{PREFIX}eco sell <item>` · `{PREFIX}eco gift @user <item>`",
         "🪙 Economy",
     ))
 
@@ -2384,6 +2386,8 @@ async def eco_work(ctx: commands.Context) -> None:
         await ctx.send(embed=err(f"You're tired. Rest **{fmt_duration(wait)}**."))
         return
     earned = random.randint(40, 120)
+    if _owned(ctx.author.id, "pickaxe"):
+        earned = int(earned * 1.25)
     you["work"] = time.time()
     you["bal"] += earned
     save_data()
@@ -2403,7 +2407,8 @@ async def eco_gamble(ctx: commands.Context, amount: int) -> None:
     if amount > you["bal"]:
         await ctx.send(embed=err(f"You only have {_coins(you['bal'])}."))
         return
-    if random.random() < 0.47:
+    chance = 0.47 + (0.07 if _owned(ctx.author.id, "lucky") else 0.0)
+    if random.random() < chance:
         you["bal"] += amount
         result = f"🎉 You won **{amount}** coins! Balance: {_coins(you['bal'])}"
         emb, ttl = ok(result, "🎲 Gamble"), None
@@ -2452,8 +2457,24 @@ async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
     if victim["bal"] < 50:
         await ctx.send(embed=err(f"{member.mention} is broke. Have some mercy."))
         return
+
+    # Shield: blocks the attempt outright and breaks
+    if _owned(member.id, "shield"):
+        _add_item(member.id, "shield", -1)
+        save_data()
+        left = _owned(member.id, "shield")
+        await ctx.send(embed=err(
+            f"🛡 {member.mention}'s shield blocked you. "
+            f"They have **{left}** left.", "🕵️ Robbery"
+        ))
+        return
+
     stake = max(1, int(victim["bal"] * random.uniform(0.10, 0.25)))
-    if random.random() < 0.35:
+    if _owned(member.id, "vault"):
+        stake = max(1, int(stake * 0.85))
+    chance = 0.35 + (0.15 if _owned(ctx.author.id, "lure") else 0.0)
+
+    if random.random() < chance:
         thief["bal"] += stake
         victim["bal"] -= stake
         msg = f"🕵️ Success! You took **{stake}** coins from {member.mention}."
@@ -2479,6 +2500,218 @@ async def eco_leaderboard(ctx: commands.Context) -> None:
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"`{i}.`")
         lines.append(f"{medal} <@{uid}> — {data['bal']:,}")
     await ctx.send(embed=fun("\n".join(lines), "🏆 Richest members"))
+
+
+# ---------------------------------------------------------------------------
+# Shop + inventory
+# ---------------------------------------------------------------------------
+# Items are real, not decoration: they change the odds in gamble/work/rob.
+
+SHOP: dict[str, dict] = {
+    "shield": {
+        "name": "Shield", "emoji": "🛡", "price": 400, "max": 5,
+        "effect": "Blocks one robbery against you, then breaks.",
+    },
+    "lucky": {
+        "name": "Lucky charm", "emoji": "🍀", "price": 500, "max": 1,
+        "effect": "+7% gamble win chance (passive).",
+    },
+    "lure": {
+        "name": "Lure", "emoji": "🎣", "price": 350, "max": 1,
+        "effect": "+15% robbery success rate (passive).",
+    },
+    "pickaxe": {
+        "name": "Pickaxe", "emoji": "⛏", "price": 250, "max": 1,
+        "effect": "+25% coins from work (passive).",
+    },
+    "vault": {
+        "name": "Vault", "emoji": "🔒", "price": 750, "max": 1,
+        "effect": "Robbers take 15% less from you (passive).",
+    },
+    "badge": {
+        "name": "Badge", "emoji": "🌟", "price": 1200, "max": 3,
+        "effect": "Pure flex — shows in your inventory.",
+    },
+}
+
+SALE_RATE = 0.5          # sell back for half price
+INVENTORY: dict[str, dict[str, int]] = {}
+
+
+def _inv(user_id: int) -> dict[str, int]:
+    key = str(user_id)
+    if key not in INVENTORY:
+        INVENTORY[key] = {}
+    return INVENTORY[key]
+
+
+def _owned(user_id: int, item_id: str) -> int:
+    return _inv(user_id).get(item_id, 0)
+
+
+def _resolve_item(text: str) -> Optional[str]:
+    """Accept an id ('shield') or a display name ('Lucky Charm')."""
+    q = (_core(text) or "").lower()
+    if not q:
+        return None
+    for iid, item in SHOP.items():
+        if q == iid or q == (_core(item["name"]) or "").lower():
+            return iid
+    return None
+
+
+def _add_item(user_id: int, item_id: str, amount: int) -> None:
+    inv = _inv(user_id)
+    inv[item_id] = max(0, inv.get(item_id, 0) + amount)
+    if inv[item_id] == 0:
+        inv.pop(item_id, None)
+
+
+@eco_group.command(name="shop", description="Browse the shop")
+async def eco_shop(ctx: commands.Context) -> None:
+    """List everything for sale and what you already own."""
+    inv = _inv(ctx.author.id)
+    lines = []
+    for iid, item in SHOP.items():
+        own = inv.get(iid, 0)
+        tag = f"  ·  own **{own}**" if own else ""
+        lines.append(f"{item['emoji']} **{item['name']}** — {item['price']:,}{tag}")
+        lines.append(f"-# `{iid}`  {item['effect']}")
+    bal = _eco(ctx.author.id)["bal"]
+    embed = fun("\n".join(lines)[:3900], "🛒 Shop")
+    embed.set_footer(text=f"Your balance: {bal:,} coins  •  {PREFIX}eco buy <item> [amount]")
+    await ctx.send(embed=embed)
+
+
+@eco_group.command(name="buy", description="Buy an item")
+async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
+    """Usage: !eco buy shield  /  !eco buy lucky 1"""
+    iid = _resolve_item(item)
+    if iid is None:
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco shop`."))
+        return
+    if amount < 1:
+        await ctx.send(embed=err("Buy at least 1."))
+        return
+
+    meta = SHOP[iid]
+    wallet = _eco(ctx.author.id)
+    owned = _owned(ctx.author.id, iid)
+
+    if owned + amount > meta["max"]:
+        await ctx.send(embed=err(
+            f"You can only hold **{meta['max']}** {meta['name']} (you have {owned})."
+        ))
+        return
+
+    cost = meta["price"] * amount
+    if wallet["bal"] < cost:
+        await ctx.send(embed=err(
+            f"That costs **{cost:,}** coins. You have **{wallet['bal']:,}**."
+        ))
+        return
+
+    wallet["bal"] -= cost
+    _add_item(ctx.author.id, iid, amount)
+    save_data()
+    await ctx.send(embed=ok(
+        f"{meta['emoji']} Bought **{amount}× {meta['name']}** for **{cost:,}** coins.\n"
+        f"Balance: {_coins(wallet['bal'])}",
+        "🛒 Purchased",
+    ))
+
+
+@eco_group.command(name="inventory", description="Show what you own")
+async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """Usage: !eco inventory  /  !eco inventory @user"""
+    target = member or ctx.author
+    inv = _inv(target.id)
+    wallet = _eco(target.id)
+
+    if not inv:
+        await ctx.send(embed=info(
+            f"{target.mention} owns nothing yet.\nTry `{PREFIX}eco shop`.", "🎒 Inventory"
+        ))
+        return
+
+    lines = []
+    for iid, count in sorted(inv.items(), key=lambda kv: -kv[1]):
+        meta = SHOP.get(iid)
+        if meta is None:
+            continue
+        lines.append(f"{meta['emoji']} **{meta['name']}** × **{count}**")
+        lines.append(f"-# {meta['effect']}")
+
+    embed = fun("\n".join(lines)[:3900], f"🎒 {target.display_name}'s inventory")
+    embed.set_footer(text=f"Balance: {wallet['bal']:,} coins")
+    await ctx.send(embed=embed)
+
+
+@eco_group.command(name="sell", description="Sell an item back")
+async def eco_sell(ctx: commands.Context, item: str, amount: int = 1) -> None:
+    """Sell for half price. Usage: !eco sell shield 2"""
+    iid = _resolve_item(item)
+    if iid is None:
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        return
+    if amount < 1:
+        await ctx.send(embed=err("Sell at least 1."))
+        return
+
+    owned = _owned(ctx.author.id, iid)
+    if owned < amount:
+        await ctx.send(embed=err(f"You only have **{owned}** {SHOP[iid]['name']}."))
+        return
+
+    refund = int(SHOP[iid]["price"] * SALE_RATE) * amount
+    wallet = _eco(ctx.author.id)
+    _add_item(ctx.author.id, iid, -amount)
+    wallet["bal"] += refund
+    save_data()
+    await ctx.send(embed=ok(
+        f"Sold **{amount}× {SHOP[iid]['name']}** for **{refund:,}** coins.\n"
+        f"Balance: {_coins(wallet['bal'])}",
+        "💱 Sold",
+    ))
+
+
+@eco_group.command(name="gift", description="Give an item to someone")
+async def eco_gift(ctx: commands.Context, member: discord.Member, item: str, amount: int = 1) -> None:
+    """Usage: !eco gift @user shield 1"""
+    if member.bot:
+        await ctx.send(embed=err("Bots don't carry items."))
+        return
+    if member.id == ctx.author.id:
+        await ctx.send(embed=err("Gifting yourself does nothing."))
+        return
+
+    iid = _resolve_item(item)
+    if iid is None:
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        return
+    if amount < 1:
+        await ctx.send(embed=err("Gift at least 1."))
+        return
+
+    owned = _owned(ctx.author.id, iid)
+    if owned < amount:
+        await ctx.send(embed=err(f"You only have **{owned}** {SHOP[iid]['name']}."))
+        return
+
+    receiver_total = _owned(member.id, iid)
+    if receiver_total + amount > SHOP[iid]["max"]:
+        await ctx.send(embed=err(
+            f"{member.mention} can only hold **{SHOP[iid]['max']}** {SHOP[iid]['name']}."
+        ))
+        return
+
+    _add_item(ctx.author.id, iid, -amount)
+    _add_item(member.id, iid, amount)
+    save_data()
+    await ctx.send(embed=ok(
+        f"{SHOP[iid]['emoji']} Gave **{amount}× {SHOP[iid]['name']}** to {member.mention}.",
+        "🎁 Gifted",
+    ))
 
 
 # ===========================================================================
@@ -2532,6 +2765,7 @@ def _serialize() -> dict:
             for gw in keep
         },
         "economy": {uid: data for uid, data in ECONOMY.items() if data.get("bal") or data.get("daily")},
+        "inventory": {uid: items for uid, items in INVENTORY.items() if items},
         "tickets": {
             str(t.channel_id): {
                 "channel_id": t.channel_id,
@@ -2635,6 +2869,16 @@ async def restore_state() -> None:
         except Exception:
             continue
 
+    restored_items = 0
+    for uid, items in (raw.get("inventory") or {}).items():
+        try:
+            clean = {str(iid): int(n) for iid, n in items.items() if int(n) > 0 and iid in SHOP}
+            if clean:
+                INVENTORY[str(uid)] = clean
+                restored_items += sum(clean.values())
+        except Exception:
+            continue
+
     restored_tickets = 0
     for _cid, t in (raw.get("tickets") or {}).items():
         try:
@@ -2656,8 +2900,8 @@ async def restore_state() -> None:
     active = [g for g in GIVEAWAYS.values() if not g.ended]
     print(
         f"Restored {restored_warnings} warning record(s), {restored_gw} giveaway(s) "
-        f"({len(active)} still running), {restored_tickets} ticket(s) "
-        f"and {restored_eco} wallet(s) from {DATA_FILE}."
+        f"({len(active)} still running), {restored_tickets} ticket(s), "
+        f"{restored_eco} wallet(s) and {restored_items} item(s) from {DATA_FILE}."
     )
 
     for gw in active:
@@ -2694,6 +2938,7 @@ async def datainfo(ctx: commands.Context) -> None:
         f"**Warning records:** {len(WARNINGS)} ({warns} warnings)\n"
         f"**Giveaways:** {active} running, {ended} finished\n"
         f"**Total entries held:** {entries}\n"
+        f"**Wallets:** {len(ECONOMY)} · **items owned:** {sum(sum(i.values()) for i in INVENTORY.values())}\n"
         f"**Tickets:** {open_ticket_count()} open, "
         f"{sum(1 for t in TICKETS.values() if t.status == 'closed')} in history\n"
         f"**Transcripts:** `{os.path.abspath(TRANSCRIPT_DIR)}`",
@@ -2905,7 +3150,8 @@ CATEGORIES: dict[str, list[str]] = {
     ],
     "🪙 Economy": [
         "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
-        "eco rob", "eco leaderboard",
+        "eco rob", "eco leaderboard", "eco shop", "eco buy", "eco inventory",
+        "eco sell", "eco gift",
     ],
 }
 

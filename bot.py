@@ -2364,10 +2364,10 @@ async def eco_group(ctx: commands.Context) -> None:
         f"`{PREFIX}eco balance`\n"
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
         f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
-        f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco dailyshop` · `{PREFIX}eco buy <item>`\n"
-        f"`{PREFIX}eco inventory` · `{PREFIX}eco use <item>` · `{PREFIX}eco sell <item>`\n"
+        f"**Items you own:** `{PREFIX}eco inventory` · `{PREFIX}eco use <item>`\n"
         f"`{PREFIX}eco gift @user <item>`\n\n"
-        f"**Auction:** `{PREFIX}eco auction` · `{PREFIX}eco bid <amount>`\n"
+        f"**Shopping & auctions →** `{PREFIX}market shop` · `{PREFIX}market auction`\n"
+        f"**Bidding stays here:** `{PREFIX}eco bid <amount>`\n"
         f"**Trade:** `{PREFIX}eco trade @user` · `tradeadd` · `tradecoins` · `tradeconfirm` · `tradecancel`",
         "🪙 Economy",
     ))
@@ -2819,7 +2819,17 @@ def _add_item(user_id: int, item_id: str, amount: int) -> None:
         inv.pop(item_id, None)
 
 
-@eco_group.command(name="shop", description="Browse the shop")
+@bot.hybrid_group(name="market", description="Shop, deals and auctions", invoke_without_command=True)
+async def market_group(ctx: commands.Context) -> None:
+    """Shop, daily deals and the auction house."""
+    group = bot.get_command("market")
+    subs = sorted(f"`{PREFIX}market {c.name}`" for c in (group.commands if group else []))
+    embed = fun(" · ".join(subs) if subs else "No subcommands loaded.", "🛒 Market")
+    embed.set_footer(text=f"Coins, items and auctions  •  {PREFIX}eco profile for your balance")
+    await ctx.send(embed=embed)
+
+
+@market_group.command(name="shop", description="Browse the shop")
 async def eco_shop(ctx: commands.Context) -> None:
     """List everything for sale and what you already own."""
     inv = _inv(ctx.author.id)
@@ -2834,16 +2844,16 @@ async def eco_shop(ctx: commands.Context) -> None:
         lines.append(f"-# `{iid}` · {_kind_label(item)} · {item['effect']}")
     bal = _eco(ctx.author.id)["bal"]
     embed = fun("\n".join(lines)[:3900], "🛒 Shop")
-    embed.set_footer(text=f"Your balance: {bal:,} coins  •  {PREFIX}eco buy <item> [amount]")
+    embed.set_footer(text=f"Your balance: {bal:,} coins  •  {PREFIX}market buy <item> [amount]")
     await ctx.send(embed=embed)
 
 
-@eco_group.command(name="buy", description="Buy an item")
+@market_group.command(name="buy", description="Buy an item")
 async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
     """Usage: !eco buy shield  /  !eco buy lucky 1"""
     iid = _resolve_item(item)
     if iid is None:
-        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco shop`."))
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}market shop`."))
         return
     if amount < 1:
         await ctx.send(embed=err("Buy at least 1."))
@@ -2900,7 +2910,7 @@ async def eco_use(ctx: commands.Context, item: str) -> None:
 
     owned = _owned(ctx.author.id, iid)
     if owned < 1:
-        await ctx.send(embed=err(f"You don't own any {meta['name']}. Try `{PREFIX}eco shop`."))
+        await ctx.send(embed=err(f"You don't own any {meta['name']}. Try `{PREFIX}market shop`."))
         return
 
     wallet = _eco(ctx.author.id)
@@ -2952,7 +2962,7 @@ async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] 
 
     if not inv:
         await ctx.send(embed=info(
-            f"{target.mention} owns nothing yet.\nTry `{PREFIX}eco shop`.", "🎒 Inventory"
+            f"{target.mention} owns nothing yet.\nTry `{PREFIX}market shop`.", "🎒 Inventory"
         ))
         return
 
@@ -2978,7 +2988,7 @@ async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] 
     await ctx.send(embed=embed)
 
 
-@eco_group.command(name="sell", description="Sell an item back")
+@market_group.command(name="sell", description="Sell an item back")
 async def eco_sell(ctx: commands.Context, item: str, amount: int = 1) -> None:
     """Sell for half price. Usage: !eco sell shield 2"""
     iid = _resolve_item(item)
@@ -3152,7 +3162,7 @@ async def eco_weekly(ctx: commands.Context) -> None:
     ))
 
 
-@eco_group.command(name="dailyshop", description="Today's discounted stock")
+@market_group.command(name="dailyshop", description="Today's discounted stock")
 async def eco_dailyshop(ctx: commands.Context) -> None:
     """Rotating daily deals — buy with !eco buy."""
     lines = []
@@ -3164,11 +3174,11 @@ async def eco_dailyshop(ctx: commands.Context) -> None:
         lines.append(f"-# `{iid}` · {_kind_label(item)} · {item['effect']}")
     reset_in = 86400 - (int(time.time()) % 86400)
     embed = fun("\n".join(lines)[:3900], "🏷 Daily shop")
-    embed.set_footer(text=f"Buy with {PREFIX}eco buy <item>  •  resets in {fmt_duration(reset_in)}")
+    embed.set_footer(text=f"Buy with {PREFIX}market buy <item>  •  resets in {fmt_duration(reset_in)}")
     await ctx.send(embed=embed)
 
 
-@eco_group.command(name="auction", description="Show the running auction")
+@market_group.command(name="auction", description="Show the running auction")
 async def eco_auction(ctx: commands.Context) -> None:
     """Rotating item auction, every 6 hours."""
     notice = _auction_sync()
@@ -3913,12 +3923,13 @@ CATEGORIES: dict[str, list[str]] = {
         "fun morse", "fun binary", "fun color", "fun countdown",
     ],
     "🪙 Economy": [
-        "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
-        "eco profile", "eco stats", "eco rob", "eco leaderboard", "eco weekly",
-    "eco shop", "eco dailyshop",
-        "eco buy", "eco inventory", "eco use", "eco sell", "eco gift", "eco auction",
-        "eco bid", "eco trade", "eco tradeadd", "eco tradecoins",
-        "eco tradeconfirm", "eco tradecancel",
+        "eco profile", "eco stats", "eco daily", "eco work", "eco balance",
+        "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
+        "eco inventory", "eco use", "eco gift", "eco bid", "eco trade",
+        "eco tradeadd", "eco tradecoins", "eco tradeconfirm", "eco tradecancel",
+    ],
+    "🛒 Market": [
+        "market shop", "market dailyshop", "market buy", "market sell", "market auction",
     ],
 }
 

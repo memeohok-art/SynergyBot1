@@ -2351,7 +2351,8 @@ async def eco_group(ctx: commands.Context) -> None:
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
         f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
         f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco dailyshop` · `{PREFIX}eco buy <item>`\n"
-        f"`{PREFIX}eco inventory` · `{PREFIX}eco sell <item>` · `{PREFIX}eco gift @user <item>`\n\n"
+        f"`{PREFIX}eco inventory` · `{PREFIX}eco use <item>` · `{PREFIX}eco sell <item>`\n"
+        f"`{PREFIX}eco gift @user <item>`\n\n"
         f"**Auction:** `{PREFIX}eco auction` · `{PREFIX}eco bid <amount>`\n"
         f"**Trade:** `{PREFIX}eco trade @user` · `tradeadd` · `tradecoins` · `tradeconfirm` · `tradecancel`",
         "🪙 Economy",
@@ -2390,6 +2391,8 @@ async def eco_work(ctx: commands.Context) -> None:
     earned = random.randint(40, 120)
     if _owned(ctx.author.id, "pickaxe"):
         earned = int(earned * 1.25)
+    if _buff_active(ctx.author.id, "turbo"):
+        earned *= 2
     you["work"] = time.time()
     you["bal"] += earned
     save_data()
@@ -2460,14 +2463,12 @@ async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
         await ctx.send(embed=err(f"{member.mention} is broke. Have some mercy."))
         return
 
-    # Shield: blocks the attempt outright and breaks
-    if _owned(member.id, "shield"):
-        _add_item(member.id, "shield", -1)
-        save_data()
-        left = _owned(member.id, "shield")
+    # Shield buff: blocks the attempt for as long as it is active
+    if _buff_active(member.id, "shield"):
+        expiry = int(_buffs(member.id)["shield"])
         await ctx.send(embed=err(
-            f"🛡 {member.mention}'s shield blocked you. "
-            f"They have **{left}** left.", "🕵️ Robbery"
+            f"🛡 {member.mention}'s guard absorbed the attempt. "
+            f"It expires <t:{expiry}:R>.", "🕵️ Robbery"
         ))
         return
 
@@ -2475,6 +2476,9 @@ async def eco_rob(ctx: commands.Context, member: discord.Member) -> None:
     if _owned(member.id, "vault"):
         stake = max(1, int(stake * 0.85))
     chance = 0.35 + (0.15 if _owned(ctx.author.id, "lure") else 0.0)
+    if _buff_active(ctx.author.id, "cloak"):
+        chance += 0.35
+    chance = min(chance, 0.95)
 
     if random.random() < chance:
         thief["bal"] += stake
@@ -2510,31 +2514,110 @@ async def eco_leaderboard(ctx: commands.Context) -> None:
 # Items are real, not decoration: they change the odds in gamble/work/rob.
 
 SHOP: dict[str, dict] = {
-    "shield": {
-        "name": "Shield", "emoji": "🛡", "price": 400, "max": 5,
-        "effect": "Blocks one robbery against you, then breaks.",
-    },
+    # --- passive: always on while you own one -----------------------------
     "lucky": {
-        "name": "Lucky charm", "emoji": "🍀", "price": 500, "max": 1,
-        "effect": "+7% gamble win chance (passive).",
+        "name": "Lucky charm", "emoji": "🍀", "price": 500, "max": 1, "kind": "passive",
+        "effect": "+7% gamble win chance.",
     },
     "lure": {
-        "name": "Lure", "emoji": "🎣", "price": 350, "max": 1,
-        "effect": "+15% robbery success rate (passive).",
+        "name": "Lure", "emoji": "🎣", "price": 350, "max": 1, "kind": "passive",
+        "effect": "+15% robbery success rate.",
     },
     "pickaxe": {
-        "name": "Pickaxe", "emoji": "⛏", "price": 250, "max": 1,
-        "effect": "+25% coins from work (passive).",
+        "name": "Pickaxe", "emoji": "⛏", "price": 250, "max": 1, "kind": "passive",
+        "effect": "+25% coins from work.",
     },
     "vault": {
-        "name": "Vault", "emoji": "🔒", "price": 750, "max": 1,
-        "effect": "Robbers take 15% less from you (passive).",
+        "name": "Vault", "emoji": "🔒", "price": 750, "max": 1, "kind": "passive",
+        "effect": "Robbers take 15% less from you.",
     },
     "badge": {
-        "name": "Badge", "emoji": "🌟", "price": 1200, "max": 3,
+        "name": "Badge", "emoji": "🌟", "price": 1200, "max": 3, "kind": "passive",
         "effect": "Pure flex — shows in your inventory.",
     },
+    # --- active: consume one with !eco use for a timed buff ----------------
+    "shield": {
+        "name": "Shield", "emoji": "🛡", "price": 400, "max": 5, "kind": "active",
+        "duration": 1800, "effect": "Robberies against you fail while active.",
+        "use": "guard for 30 minutes",
+    },
+    "cloak": {
+        "name": "Cloak", "emoji": "🥷", "price": 600, "max": 3, "kind": "active",
+        "duration": 1200, "effect": "+35% robbery success while active.",
+        "use": "robbery boost for 20 minutes",
+    },
+    "turbo": {
+        "name": "Turbo", "emoji": "⚡", "price": 450, "max": 3, "kind": "active",
+        "duration": 900, "effect": "Double work earnings while active.",
+        "use": "double work pay for 15 minutes",
+    },
+    # --- instant: consume one with !eco use for an immediate effect --------
+    "lockpick": {
+        "name": "Lockpick", "emoji": "🔑", "price": 300, "max": 5, "kind": "instant",
+        "effect": "Clears your robbery cooldown instantly.",
+        "use": "reset robbery cooldown",
+    },
+    "chest": {
+        "name": "Chest", "emoji": "🎁", "price": 500, "max": 10, "kind": "instant",
+        "effect": "Opens for 100-900 coins.",
+        "use": "open for random coins",
+    },
 }
+
+# Active buffs: user_id -> {item_id: expiry timestamp}
+BUFFS: dict[str, dict[str, float]] = {}
+
+
+def _buffs(user_id: int) -> dict[str, float]:
+    """Live buffs only — expired entries are pruned on read."""
+    key = str(user_id)
+    data = BUFFS.get(key)
+    if not data:
+        return {}
+    now = time.time()
+    for iid in [i for i, exp in data.items() if exp <= now]:
+        data.pop(iid, None)
+    if not data:
+        BUFFS.pop(key, None)
+        return {}
+    return data
+
+
+def _buff_active(user_id: int, item_id: str) -> bool:
+    return item_id in _buffs(user_id)
+
+
+def _add_buff(user_id: int, item_id: str, seconds: int) -> float:
+    """Stack duration instead of overwriting, so hoarding isn't punished."""
+    key = str(user_id)
+    now = time.time()
+    current = BUFFS.setdefault(key, {}).get(item_id, 0.0)
+    expiry = max(now, current) + seconds
+    BUFFS[key][item_id] = expiry
+    return expiry
+
+
+def _live_buffs() -> dict[str, dict[str, float]]:
+    """Only unexpired buffs, and prune the expired ones from memory too."""
+    now = time.time()
+    out: dict[str, dict[str, float]] = {}
+    for uid in list(BUFFS):
+        live = {i: exp for i, exp in BUFFS[uid].items() if exp > now}
+        if live:
+            BUFFS[uid] = live
+            out[uid] = live
+        else:
+            BUFFS.pop(uid, None)
+    return out
+
+
+def _kind_label(item: dict) -> str:
+    kind = item.get("kind", "passive")
+    if kind == "active":
+        return f"use · {fmt_duration(item.get('duration', 0))}"
+    if kind == "instant":
+        return "use · instant"
+    return "passive"
 
 SALE_RATE = 0.5          # sell back for half price
 INVENTORY: dict[str, dict[str, int]] = {}
@@ -2581,7 +2664,7 @@ async def eco_shop(ctx: commands.Context) -> None:
         if off:
             tag += f"  ·  **-{off}%** today"
         lines.append(f"{item['emoji']} **{item['name']}** — {item['price']:,}{tag}")
-        lines.append(f"-# `{iid}`  {item['effect']}")
+        lines.append(f"-# `{iid}` · {_kind_label(item)} · {item['effect']}")
     bal = _eco(ctx.author.id)["bal"]
     embed = fun("\n".join(lines)[:3900], "🛒 Shop")
     embed.set_footer(text=f"Your balance: {bal:,} coins  •  {PREFIX}eco buy <item> [amount]")
@@ -2629,6 +2712,69 @@ async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
     ))
 
 
+@eco_group.command(name="use", description="Use an item")
+async def eco_use(ctx: commands.Context, item: str) -> None:
+    """Activate a timed buff, or trigger an instant item."""
+    iid = _resolve_item(item)
+    if iid is None:
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        return
+
+    meta = SHOP[iid]
+    kind = meta.get("kind", "passive")
+
+    if kind == "passive":
+        await ctx.send(embed=info(
+            f"{meta['emoji']} **{meta['name']}** is passive — it works automatically "
+            f"while you own it, nothing to use.\n-# {meta['effect']}",
+            "Passive item",
+        ))
+        return
+
+    owned = _owned(ctx.author.id, iid)
+    if owned < 1:
+        await ctx.send(embed=err(f"You don't own any {meta['name']}. Try `{PREFIX}eco shop`."))
+        return
+
+    wallet = _eco(ctx.author.id)
+
+    if kind == "active":
+        duration = int(meta.get("duration", 600))
+        expiry = _add_buff(ctx.author.id, iid, duration)
+        _add_item(ctx.author.id, iid, -1)
+        save_data()
+        await ctx.send(embed=ok(
+            f"{meta['emoji']} Used **{meta['name']}** — {meta['use']}.\n"
+            f"Active until <t:{int(expiry)}:t> (<t:{int(expiry)}:R>). "
+            f"You have **{_owned(ctx.author.id, iid)}** left.",
+            "✅ Activated",
+        ))
+        return
+
+    if iid == "lockpick":
+        wallet["rob"] = 0.0
+        _add_item(ctx.author.id, iid, -1)
+        save_data()
+        await ctx.send(embed=ok(
+            "🔑 Lockpick used — your robbery cooldown is cleared.", "✅ Used"
+        ))
+        return
+
+    if iid == "chest":
+        prize = random.randint(100, 900)
+        wallet["bal"] += prize
+        _add_item(ctx.author.id, iid, -1)
+        save_data()
+        await ctx.send(embed=fun(
+            f"🎁 You opened a chest and found **{prize:,}** coins!\n"
+            f"Balance: {_coins(wallet['bal'])}",
+            "Chest opened",
+        ))
+        return
+
+    await ctx.send(embed=err("That item has no use effect yet."))
+
+
 @eco_group.command(name="inventory", description="Show what you own")
 async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
     """Usage: !eco inventory  /  !eco inventory @user"""
@@ -2647,8 +2793,17 @@ async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] 
         meta = SHOP.get(iid)
         if meta is None:
             continue
-        lines.append(f"{meta['emoji']} **{meta['name']}** × **{count}**")
+        lines.append(f"{meta['emoji']} **{meta['name']}** × **{count}**  ·  {_kind_label(meta)}")
         lines.append(f"-# {meta['effect']}")
+
+    active = _buffs(target.id)
+    if active:
+        lines.append("")
+        lines.append("**Active effects**")
+        for iid, exp in sorted(active.items(), key=lambda kv: -kv[1]):
+            meta = SHOP.get(iid)
+            if meta:
+                lines.append(f"{meta['emoji']} {meta['name']} — expires <t:{int(exp)}:R>")
 
     embed = fun("\n".join(lines)[:3900], f"🎒 {target.display_name}'s inventory")
     embed.set_footer(text=f"Balance: {wallet['bal']:,} coins")
@@ -2837,7 +2992,7 @@ async def eco_dailyshop(ctx: commands.Context) -> None:
         off = _discount_for(iid)
         was = f" ~~{item['price']:,}~~" if off else ""
         lines.append(f"{item['emoji']} **{item['name']}** — {price:,}{was}  ·  **-{off}%**")
-        lines.append(f"-# `{iid}`  {item['effect']}")
+        lines.append(f"-# `{iid}` · {_kind_label(item)} · {item['effect']}")
     reset_in = 86400 - (int(time.time()) % 86400)
     embed = fun("\n".join(lines)[:3900], "🏷 Daily shop")
     embed.set_footer(text=f"Buy with {PREFIX}eco buy <item>  •  resets in {fmt_duration(reset_in)}")
@@ -3151,6 +3306,7 @@ def _serialize() -> dict:
         },
         "economy": {uid: data for uid, data in ECONOMY.items() if data.get("bal") or data.get("daily")},
         "inventory": {uid: items for uid, items in INVENTORY.items() if items},
+        "buffs": _live_buffs(),
         "auction": AUCTION,
         "trades": {tid: t for tid, t in TRADES.items() if time.time() < t.get("expires", 0)},
         "tickets": {
@@ -3264,6 +3420,15 @@ async def restore_state() -> None:
             if clean:
                 INVENTORY[str(uid)] = clean
                 restored_items += sum(clean.values())
+        except Exception:
+            continue
+
+    for uid, b in (raw.get("buffs") or {}).items():
+        try:
+            live = {str(iid): float(exp) for iid, exp in b.items()
+                    if iid in SHOP and float(exp) > time.time()}
+            if live:
+                BUFFS[str(uid)] = live
         except Exception:
             continue
 
@@ -3576,7 +3741,7 @@ CATEGORIES: dict[str, list[str]] = {
     "🪙 Economy": [
         "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
         "eco rob", "eco leaderboard", "eco weekly", "eco shop", "eco dailyshop",
-        "eco buy", "eco inventory", "eco sell", "eco gift", "eco auction",
+        "eco buy", "eco inventory", "eco use", "eco sell", "eco gift", "eco auction",
         "eco bid", "eco trade", "eco tradeadd", "eco tradecoins",
         "eco tradeconfirm", "eco tradecancel",
     ],

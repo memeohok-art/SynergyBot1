@@ -220,9 +220,12 @@ async def ping(ctx: commands.Context) -> None:
     start = time.perf_counter()
     msg = await ctx.send(embed=info("Pinging..."))
     rtt = (time.perf_counter() - start) * 1000
+    # bot.latency is NaN until the gateway has completed a heartbeat
+    gw = bot.latency * 1000
+    gw = 0 if gw != gw else round(gw)
     await msg.edit(
         embed=info(
-            f"**Gateway:** `{round(bot.latency * 1000)} ms`\n"
+            f"**Gateway:** `{gw} ms`\n"
             f"**Round trip:** `{round(rtt)} ms`",
             "🏓 Pong",
         )

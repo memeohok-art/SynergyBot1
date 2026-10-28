@@ -20,5 +20,19 @@ sleep 3
 systemctl --no-pager --lines=5 status "$SERVICE_NAME" || true
 
 echo
-echo "Tailing logs (Ctrl+C to stop):"
-journalctl -u "$SERVICE_NAME" -f -n 20
+echo "==> Waiting for the bot to come up"
+sleep 8
+
+echo
+echo "==> Boot lines:"
+journalctl -u "$SERVICE_NAME" --no-pager -n 80 \
+  | grep -E "Logged in|Commands loaded|Synced|Members intent|Data file|Traceback|Error|error" \
+  || echo "    (no matching lines yet - check: journalctl -u $SERVICE_NAME -n 50)"
+
+echo
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+  echo "Service is active. Expected: 'Commands loaded: 99' and 'Synced 98 slash commands'."
+else
+  echo "Service is NOT active. Investigate with: journalctl -u $SERVICE_NAME -n 50"
+  exit 1
+fi

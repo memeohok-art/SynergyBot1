@@ -2364,11 +2364,9 @@ async def eco_group(ctx: commands.Context) -> None:
         f"`{PREFIX}eco balance`\n"
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
         f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
-        f"**Items you own:** `{PREFIX}eco inventory` · `{PREFIX}eco use <item>`\n"
-        f"`{PREFIX}eco gift @user <item>`\n\n"
-        f"**Shopping & auctions →** `{PREFIX}market shop` · `{PREFIX}market auction`\n"
-        f"**Bidding stays here:** `{PREFIX}eco bid <amount>`\n"
-        f"**Trade:** `{PREFIX}eco trade @user` · `tradeadd` · `tradecoins` · `tradeconfirm` · `tradecancel`",
+        f"**Everything item-related lives in** `{PREFIX}market`\n"
+        f"-# shop · dailyshop · buy · sell · sellall · restock · auction · bid\n"
+        f"-# inventory · use · gift · trade",
         "🪙 Economy",
     ))
 
@@ -2575,7 +2573,7 @@ async def eco_profile(ctx: commands.Context, member: Optional[discord.Member] = 
         active = "none active"
     embed.add_field(name="✨ Active buffs", value=active[:1024], inline=False)
 
-    embed.set_footer(text=f"!eco shop · !eco use <item> · !eco daily")
+    embed.set_footer(text=f"!market shop · !market use <item> · !eco daily")
     await ctx.send(embed=embed)
 
 
@@ -2702,7 +2700,7 @@ SHOP: dict[str, dict] = {
         "name": "Badge", "emoji": "🌟", "price": 1200, "max": 3, "kind": "passive",
         "effect": "Pure flex — shows in your inventory.",
     },
-    # --- active: consume one with !eco use for a timed buff ----------------
+    # --- active: consume one with !market use for a timed buff ----------------
     "shield": {
         "name": "Shield", "emoji": "🛡", "price": 400, "max": 5, "kind": "active",
         "duration": 1800, "effect": "Robberies against you fail while active.",
@@ -2718,7 +2716,7 @@ SHOP: dict[str, dict] = {
         "duration": 900, "effect": "Double work earnings while active.",
         "use": "double work pay for 15 minutes",
     },
-    # --- instant: consume one with !eco use for an immediate effect --------
+    # --- instant: consume one with !market use for an immediate effect --------
     "lockpick": {
         "name": "Lockpick", "emoji": "🔑", "price": 300, "max": 5, "kind": "instant",
         "effect": "Clears your robbery cooldown instantly.",
@@ -2787,6 +2785,46 @@ def _kind_label(item: dict) -> str:
     return "passive"
 
 SALE_RATE = 0.5          # sell back for half price
+# ---------------------------------------------------------------------------
+# Shop stock: a rotating, limited supply that restocks on a timer
+# ---------------------------------------------------------------------------
+RESTOCK_SECONDS = 2 * 3600        # every 2 hours
+STOCK_MAX = 99                    # cap when a restock pushes past the max
+
+STOCK: dict = {"period": 0, "nonce": 0, "stock": {}}
+
+
+def _restock_period() -> int:
+    return int(time.time() // RESTOCK_SECONDS)
+
+
+def _restock_lot(period: int, nonce: int = 0) -> dict[str, int]:
+    """Deterministic supply for a cycle: 6 of the 10 items, 3-8 units each."""
+    rng = random.Random(f"stock-{period}-{nonce}")
+    ids = list(SHOP)
+    rng.shuffle(ids)
+    return {iid: rng.randint(3, 8) for iid in ids[:6]}
+
+
+def _stock_sync() -> None:
+    """Roll over to a new supply when the cycle changes."""
+    period = _restock_period()
+    if STOCK.get("period") != period or not STOCK.get("stock"):
+        STOCK["period"] = period
+        STOCK["nonce"] = 0
+        STOCK["stock"] = _restock_lot(period, 0)
+        save_data()
+
+
+def _stock_of(iid: str) -> int:
+    _stock_sync()
+    return int(STOCK["stock"].get(iid, 0))
+
+
+def _restock_seconds_left() -> int:
+    return RESTOCK_SECONDS - int(time.time() % RESTOCK_SECONDS)
+
+
 INVENTORY: dict[str, dict[str, int]] = {}
 
 
@@ -2819,7 +2857,7 @@ def _add_item(user_id: int, item_id: str, amount: int) -> None:
         inv.pop(item_id, None)
 
 
-@bot.hybrid_group(name="market", description="Shop, deals and auctions", invoke_without_command=True)
+@bot.hybrid_group(name="market", description="Shop, items, trades and auctions", invoke_without_command=True)
 async def market_group(ctx: commands.Context) -> None:
     """Shop, daily deals and the auction house."""
     group = bot.get_command("market")
@@ -2840,17 +2878,23 @@ async def eco_shop(ctx: commands.Context) -> None:
         off = _discount_for(iid)
         if off:
             tag += f"  ·  **-{off}%** today"
-        lines.append(f"{item['emoji']} **{item['name']}** — {item['price']:,}{tag}")
+        price = _shop_price(iid)
+        shown = f"~~{item['price']:,}~~ {price:,}" if price != item["price"] else f"{price:,}"
+        stock = _stock_of(iid)
+        stock_tag = "  ·  **SOLD OUT**" if stock == 0 else f"  ·  stock **{stock}**"
+        lines.append(f"{item['emoji']} **{item['name']}** — {shown}{tag}{stock_tag}")
         lines.append(f"-# `{iid}` · {_kind_label(item)} · {item['effect']}")
     bal = _eco(ctx.author.id)["bal"]
     embed = fun("\n".join(lines)[:3900], "🛒 Shop")
-    embed.set_footer(text=f"Your balance: {bal:,} coins  •  {PREFIX}market buy <item> [amount]")
+    embed.set_footer(
+        text=f"Your balance: {bal:,} coins  •  restocks in {fmt_duration(_restock_seconds_left())}"
+    )
     await ctx.send(embed=embed)
 
 
 @market_group.command(name="buy", description="Buy an item")
 async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
-    """Usage: !eco buy shield  /  !eco buy lucky 1"""
+    """Usage: !market buy shield  /  !market buy lucky 1"""
     iid = _resolve_item(item)
     if iid is None:
         await ctx.send(embed=err(f"No such item. Try `{PREFIX}market shop`."))
@@ -2862,6 +2906,20 @@ async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
     meta = SHOP[iid]
     wallet = _eco(ctx.author.id)
     owned = _owned(ctx.author.id, iid)
+
+    stock = _stock_of(iid)
+    if stock <= 0:
+        await ctx.send(embed=err(
+            f"{meta['emoji']} **{meta['name']}** is sold out. "
+            f"Restock in **{fmt_duration(_restock_seconds_left())}**."
+        ))
+        return
+    if amount > stock:
+        await ctx.send(embed=err(
+            f"Only **{stock}** {meta['name']} left in stock. "
+            f"Use `{PREFIX}market restock` to see supplies."
+        ))
+        return
 
     if owned + amount > meta["max"]:
         await ctx.send(embed=err(
@@ -2880,6 +2938,7 @@ async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
 
     wallet["bal"] -= cost
     _add_item(ctx.author.id, iid, amount)
+    STOCK["stock"][iid] = stock - amount
     save_data()
     deal = f" (**-{off}%** daily deal)" if off else ""
     await ctx.send(embed=ok(
@@ -2889,12 +2948,12 @@ async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
     ))
 
 
-@eco_group.command(name="use", description="Use an item")
+@market_group.command(name="use", description="Use an item")
 async def eco_use(ctx: commands.Context, item: str) -> None:
     """Activate a timed buff, or trigger an instant item."""
     iid = _resolve_item(item)
     if iid is None:
-        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}market inventory`."))
         return
 
     meta = SHOP[iid]
@@ -2953,9 +3012,9 @@ async def eco_use(ctx: commands.Context, item: str) -> None:
     await ctx.send(embed=err("That item has no use effect yet."))
 
 
-@eco_group.command(name="inventory", description="Show what you own")
+@market_group.command(name="inventory", description="Show what you own")
 async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
-    """Usage: !eco inventory  /  !eco inventory @user"""
+    """Usage: !market inventory  /  !market inventory @user"""
     target = member or ctx.author
     inv = _inv(target.id)
     wallet = _eco(target.id)
@@ -2990,10 +3049,10 @@ async def eco_inventory(ctx: commands.Context, member: Optional[discord.Member] 
 
 @market_group.command(name="sell", description="Sell an item back")
 async def eco_sell(ctx: commands.Context, item: str, amount: int = 1) -> None:
-    """Sell for half price. Usage: !eco sell shield 2"""
+    """Sell for half price. Usage: !market sell shield 2"""
     iid = _resolve_item(item)
     if iid is None:
-        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}market inventory`."))
         return
     if amount < 1:
         await ctx.send(embed=err("Sell at least 1."))
@@ -3016,9 +3075,9 @@ async def eco_sell(ctx: commands.Context, item: str, amount: int = 1) -> None:
     ))
 
 
-@eco_group.command(name="gift", description="Give an item to someone")
+@market_group.command(name="gift", description="Give an item to someone")
 async def eco_gift(ctx: commands.Context, member: discord.Member, item: str, amount: int = 1) -> None:
-    """Usage: !eco gift @user shield 1"""
+    """Usage: !market gift @user shield 1"""
     if member.bot:
         await ctx.send(embed=err("Bots don't carry items."))
         return
@@ -3028,7 +3087,7 @@ async def eco_gift(ctx: commands.Context, member: discord.Member, item: str, amo
 
     iid = _resolve_item(item)
     if iid is None:
-        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}market inventory`."))
         return
     if amount < 1:
         await ctx.send(embed=err("Gift at least 1."))
@@ -3079,8 +3138,10 @@ def _daily_key() -> str:
 
 def _daily_shop() -> list[tuple[str, int]]:
     """Today's discounted stock. Same list all day, changes at UTC midnight."""
-    rng = random.Random(f"shop-{_daily_key()}")
-    picks = rng.sample(list(SHOP), k=min(4, len(SHOP)))
+    _stock_sync()
+    available = [i for i, n in STOCK["stock"].items() if n > 0] or list(SHOP)
+    rng = random.Random(f"shop-{_daily_key()}-{STOCK['period']}")
+    picks = rng.sample(available, k=min(4, len(available)))
     out = []
     for iid in picks:
         discount = rng.choice([10, 15, 20, 25, 30])
@@ -3164,7 +3225,7 @@ async def eco_weekly(ctx: commands.Context) -> None:
 
 @market_group.command(name="dailyshop", description="Today's discounted stock")
 async def eco_dailyshop(ctx: commands.Context) -> None:
-    """Rotating daily deals — buy with !eco buy."""
+    """Rotating daily deals — buy with !market buy."""
     lines = []
     for iid, price in _daily_shop():
         item = SHOP[iid]
@@ -3176,6 +3237,82 @@ async def eco_dailyshop(ctx: commands.Context) -> None:
     embed = fun("\n".join(lines)[:3900], "🏷 Daily shop")
     embed.set_footer(text=f"Buy with {PREFIX}market buy <item>  •  resets in {fmt_duration(reset_in)}")
     await ctx.send(embed=embed)
+
+
+@market_group.command(name="restock", description="Shop supply and next restock")
+async def market_restock(ctx: commands.Context, force: bool = False) -> None:
+    """See what is in stock. Staff can force a restock with force:True."""
+    _stock_sync()
+
+    if force:
+        perms = getattr(ctx.author, "guild_permissions", None)
+        if perms is None or not perms.manage_guild:
+            await ctx.send(embed=err("Only staff with **Manage Server** can force a restock."))
+            return
+        STOCK["nonce"] = int(STOCK.get("nonce", 0)) + 1
+        STOCK["stock"] = _restock_lot(STOCK["period"], STOCK["nonce"])
+        save_data()
+        await ctx.send(embed=ok(
+            f"🔄 Forced a restock — **{sum(STOCK['stock'].values())}** units across "
+            f"**{len(STOCK['stock'])}** items.", "🔄 Restocked"
+        ))
+        return
+
+    lines = []
+    for iid, qty in sorted(STOCK["stock"].items(), key=lambda kv: -kv[1]):
+        item = SHOP[iid]
+        bar = "█" * min(qty, 10)
+        lines.append(f"{item['emoji']} **{item['name']}** — {qty} left  `{bar}`")
+    missing = [SHOP[i]["name"] for i in SHOP if i not in STOCK["stock"]]
+    if missing:
+        lines.append(f"-# Not in this rotation: {', '.join(missing)}")
+
+    embed = fun("\n".join(lines)[:3900], "📦 Current stock")
+    embed.set_footer(
+        text=f"Restocks in {fmt_duration(_restock_seconds_left())}  •  "
+             f"{PREFIX}market buy <item>"
+    )
+    await ctx.send(embed=embed)
+
+
+@market_group.command(name="sellall", description="Sell duplicate items for coins")
+async def market_sellall(ctx: commands.Context, confirm: bool = False) -> None:
+    """Sells everything past the first copy of each item."""
+    inv = _inv(ctx.author.id)
+    dupes = {iid: n - 1 for iid, n in inv.items() if iid in SHOP and n > 1}
+
+    if not dupes:
+        await ctx.send(embed=info(
+            "No duplicates to sell — `sellall` keeps one of each item.", "🪙 Sell duplicates"
+        ))
+        return
+
+    total = sum(int(SHOP[i]["price"] * SALE_RATE) * n for i, n in dupes.items())
+    count = sum(dupes.values())
+
+    if not confirm:
+        lines = [
+            f"{SHOP[i]['emoji']} {SHOP[i]['name']} ×{n} — "
+            f"{int(SHOP[i]['price'] * SALE_RATE) * n:,} coins"
+            for i, n in sorted(dupes.items(), key=lambda kv: -kv[1])
+        ]
+        lines.append(f"\n**Total:** {count} item(s) for **{total:,}** coins")
+        embed = info("\n".join(lines)[:3900], "🪙 Sell duplicates?")
+        embed.set_footer(text=f"Run {PREFIX}market sellall confirm:true to confirm")
+        await ctx.send(embed=embed)
+        return
+
+    for iid, n in dupes.items():
+        _add_item(ctx.author.id, iid, -n)
+    wallet = _eco(ctx.author.id)
+    wallet["bal"] += total
+    save_data()
+
+    await ctx.send(embed=ok(
+        f"Sold **{count}** duplicate item(s) for **{total:,}** coins.\n"
+        f"Balance: {_coins(wallet['bal'])}",
+        "💰 Sold duplicates",
+    ))
 
 
 @market_group.command(name="auction", description="Show the running auction")
@@ -3197,13 +3334,13 @@ async def eco_auction(ctx: commands.Context) -> None:
         f"**Ends:** <t:{int(AUCTION['ends_at'])}:R>",
         "🔨 Auction",
     )
-    embed.set_footer(text=f"Bid with {PREFIX}eco bid <amount>  •  coins are held until you're outbid")
+    embed.set_footer(text=f"Bid with {PREFIX}market bid <amount>  •  coins are held until you're outbid")
     if notice:
         embed.add_field(name="Last result", value=notice, inline=False)
     await ctx.send(embed=embed)
 
 
-@eco_group.command(name="bid", description="Bid on the auction item")
+@market_group.command(name="bid", description="Bid on the auction item")
 async def eco_bid(ctx: commands.Context, amount: int) -> None:
     """Coins are escrowed immediately and refunded if you're outbid."""
     notice = _auction_sync()
@@ -3277,11 +3414,11 @@ def _trade_embed(t: dict, title: str = "🤝 Trade offer") -> discord.Embed:
         f"{side(t['a'], t['items_a'], t['coins_a'], t['conf_a'])}\n\n"
         f"↕️\n\n"
         f"{side(t['b'], t['items_b'], t['coins_b'], t['conf_b'])}\n\n"
-        f"Both sides must run `{PREFIX}eco tradeconfirm`. "
+        f"Both sides must run `{PREFIX}market tradeconfirm`. "
         f"Expires <t:{int(t['expires'])}:R>.",
         title,
     )
-    embed.set_footer(text=f"Add: {PREFIX}eco tradeadd <item> | {PREFIX}eco tradecoins <amount> | {PREFIX}eco tradecancel")
+    embed.set_footer(text=f"Add: {PREFIX}market tradeadd <item> | {PREFIX}market tradecoins <amount> | {PREFIX}market tradecancel")
     return embed
 
 
@@ -3292,7 +3429,7 @@ def _trade_side(t: dict, uid: int) -> tuple[dict, str, str]:
     return t["items_b"], "coins_b", "conf_b"
 
 
-@eco_group.command(name="trade", description="Start a trade with a member")
+@market_group.command(name="trade", description="Start a trade with a member")
 async def eco_trade(ctx: commands.Context, member: discord.Member) -> None:
     """Open a trade. Then add items/coins and both confirm."""
     if member.bot:
@@ -3318,16 +3455,16 @@ async def eco_trade(ctx: commands.Context, member: discord.Member) -> None:
     await ctx.send(content=member.mention, embed=_trade_embed(TRADES[tid]))
 
 
-@eco_group.command(name="tradeadd", description="Add an item to your side of the trade")
+@market_group.command(name="tradeadd", description="Add an item to your side of the trade")
 async def eco_tradeadd(ctx: commands.Context, item: str, amount: int = 1) -> None:
-    """Usage: !eco tradeadd shield 2"""
+    """Usage: !market tradeadd shield 2"""
     t = _my_trade(ctx.author.id)
     if t is None:
-        await ctx.send(embed=err(f"No open trade. Start one with `{PREFIX}eco trade @user`."))
+        await ctx.send(embed=err(f"No open trade. Start one with `{PREFIX}market trade @user`."))
         return
     iid = _resolve_item(item)
     if iid is None:
-        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}market inventory`."))
         return
     if amount < 1:
         await ctx.send(embed=err("Add at least 1."))
@@ -3344,12 +3481,12 @@ async def eco_tradeadd(ctx: commands.Context, item: str, amount: int = 1) -> Non
     await ctx.send(embed=_trade_embed(t, "🤝 Trade updated"))
 
 
-@eco_group.command(name="tradecoins", description="Set how many coins you're offering")
+@market_group.command(name="tradecoins", description="Set how many coins you're offering")
 async def eco_tradecoins(ctx: commands.Context, amount: int) -> None:
-    """Usage: !eco tradecoins 250 (0 clears)"""
+    """Usage: !market tradecoins 250 (0 clears)"""
     t = _my_trade(ctx.author.id)
     if t is None:
-        await ctx.send(embed=err(f"No open trade. Start one with `{PREFIX}eco trade @user`."))
+        await ctx.send(embed=err(f"No open trade. Start one with `{PREFIX}market trade @user`."))
         return
     if amount < 0:
         await ctx.send(embed=err("Use 0 to clear your coin offer."))
@@ -3365,7 +3502,7 @@ async def eco_tradecoins(ctx: commands.Context, amount: int) -> None:
     await ctx.send(embed=_trade_embed(t, "🤝 Trade updated"))
 
 
-@eco_group.command(name="tradeconfirm", description="Confirm the trade")
+@market_group.command(name="tradeconfirm", description="Confirm the trade")
 async def eco_tradeconfirm(ctx: commands.Context) -> None:
     """Both sides must confirm — then items and coins swap."""
     t = _my_trade(ctx.author.id)
@@ -3380,7 +3517,7 @@ async def eco_tradeconfirm(ctx: commands.Context) -> None:
         save_data()
         other = t["b"] if ctx.author.id == t["a"] else t["a"]
         await ctx.send(embed=_trade_embed(t, "🤝 Waiting for confirmation"))
-        await ctx.send(f"<@{other}> — confirm with `{PREFIX}eco tradeconfirm`.")
+        await ctx.send(f"<@{other}> — confirm with `{PREFIX}market tradeconfirm`.")
         return
 
     # --- execute ---
@@ -3419,7 +3556,7 @@ async def eco_tradeconfirm(ctx: commands.Context) -> None:
     await ctx.send(embed=embed)
 
 
-@eco_group.command(name="tradecancel", description="Cancel your open trade")
+@market_group.command(name="tradecancel", description="Cancel your open trade")
 async def eco_tradecancel(ctx: commands.Context) -> None:
     """Cancel and release both sides."""
     t = _my_trade(ctx.author.id)
@@ -3486,6 +3623,7 @@ def _serialize() -> dict:
         "economy": {uid: data for uid, data in ECONOMY.items() if data.get("bal") or data.get("daily")},
         "inventory": {uid: items for uid, items in INVENTORY.items() if items},
         "buffs": _live_buffs(),
+        "stock": STOCK,
         "auction": AUCTION,
         "trades": {tid: t for tid, t in TRADES.items() if time.time() < t.get("expires", 0)},
         "tickets": {
@@ -3615,6 +3753,15 @@ async def restore_state() -> None:
                 BUFFS[str(uid)] = live
         except Exception:
             continue
+
+    saved_stock = raw.get("stock") or {}
+    if saved_stock.get("period") and int(saved_stock["period"]) == _restock_period():
+        STOCK["period"] = int(saved_stock["period"])
+        STOCK["nonce"] = int(saved_stock.get("nonce", 0))
+        STOCK["stock"] = {
+            str(k): int(v) for k, v in (saved_stock.get("stock") or {}).items()
+            if k in SHOP and int(v) >= 0
+        }
 
     saved_auction = raw.get("auction") or {}
     if saved_auction.get("period"):
@@ -3925,11 +4072,13 @@ CATEGORIES: dict[str, list[str]] = {
     "🪙 Economy": [
         "eco profile", "eco stats", "eco daily", "eco work", "eco balance",
         "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
-        "eco inventory", "eco use", "eco gift", "eco bid", "eco trade",
-        "eco tradeadd", "eco tradecoins", "eco tradeconfirm", "eco tradecancel",
     ],
     "🛒 Market": [
-        "market shop", "market dailyshop", "market buy", "market sell", "market auction",
+        "market shop", "market dailyshop", "market buy", "market sell",
+        "market sellall", "market restock", "market auction", "market bid",
+        "market inventory", "market use", "market gift", "market trade",
+        "market tradeadd", "market tradecoins", "market tradeconfirm",
+        "market tradecancel",
     ],
 }
 

@@ -35,7 +35,7 @@ import signal
 import sys
 import time
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import discord
@@ -2070,7 +2070,7 @@ ECO_ROB_COOLDOWN = 300
 def _eco(user_id: int) -> dict:
     key = str(user_id)
     if key not in ECONOMY:
-        ECONOMY[key] = {"bal": ECO_START, "daily": 0.0, "work": 0.0, "rob": 0.0}
+        ECONOMY[key] = {"bal": ECO_START, "daily": 0.0, "weekly": 0.0, "work": 0.0, "rob": 0.0}
     return ECONOMY[key]
 
 
@@ -2350,8 +2350,10 @@ async def eco_group(ctx: commands.Context) -> None:
         f"`{PREFIX}eco daily` · `{PREFIX}eco work` · `{PREFIX}eco balance`\n"
         f"`{PREFIX}eco gamble <amount>` · `{PREFIX}eco pay @user <amount>`\n"
         f"`{PREFIX}eco rob @user` · `{PREFIX}eco leaderboard`\n\n"
-        f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco buy <item>` · `{PREFIX}eco inventory`\n"
-        f"`{PREFIX}eco sell <item>` · `{PREFIX}eco gift @user <item>`",
+        f"**Shop:** `{PREFIX}eco shop` · `{PREFIX}eco dailyshop` · `{PREFIX}eco buy <item>`\n"
+        f"`{PREFIX}eco inventory` · `{PREFIX}eco sell <item>` · `{PREFIX}eco gift @user <item>`\n\n"
+        f"**Auction:** `{PREFIX}eco auction` · `{PREFIX}eco bid <amount>`\n"
+        f"**Trade:** `{PREFIX}eco trade @user` · `tradeadd` · `tradecoins` · `tradeconfirm` · `tradecancel`",
         "🪙 Economy",
     ))
 
@@ -2575,6 +2577,9 @@ async def eco_shop(ctx: commands.Context) -> None:
     for iid, item in SHOP.items():
         own = inv.get(iid, 0)
         tag = f"  ·  own **{own}**" if own else ""
+        off = _discount_for(iid)
+        if off:
+            tag += f"  ·  **-{off}%** today"
         lines.append(f"{item['emoji']} **{item['name']}** — {item['price']:,}{tag}")
         lines.append(f"-# `{iid}`  {item['effect']}")
     bal = _eco(ctx.author.id)["bal"]
@@ -2604,7 +2609,9 @@ async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
         ))
         return
 
-    cost = meta["price"] * amount
+    unit = _shop_price(iid)
+    cost = unit * amount
+    off = _discount_for(iid)
     if wallet["bal"] < cost:
         await ctx.send(embed=err(
             f"That costs **{cost:,}** coins. You have **{wallet['bal']:,}**."
@@ -2614,8 +2621,9 @@ async def eco_buy(ctx: commands.Context, item: str, amount: int = 1) -> None:
     wallet["bal"] -= cost
     _add_item(ctx.author.id, iid, amount)
     save_data()
+    deal = f" (**-{off}%** daily deal)" if off else ""
     await ctx.send(embed=ok(
-        f"{meta['emoji']} Bought **{amount}× {meta['name']}** for **{cost:,}** coins.\n"
+        f"{meta['emoji']} Bought **{amount}× {meta['name']}** for **{cost:,}** coins{deal}.\n"
         f"Balance: {_coins(wallet['bal'])}",
         "🛒 Purchased",
     ))
@@ -2714,6 +2722,383 @@ async def eco_gift(ctx: commands.Context, member: discord.Member, item: str, amo
     ))
 
 
+# ---------------------------------------------------------------------------
+# Weekly coins, daily shop, auction, trades
+# ---------------------------------------------------------------------------
+
+ECO_WEEKLY = 1000
+ECO_WEEKLY_COOLDOWN = 7 * 86400          # 7 days
+AUCTION_SECONDS = 6 * 3600               # auction rotates every 6 hours
+AUCTION_MIN_STEP = 25                    # minimum raise
+TRADE_TTL = 600                          # trade offer expires after 10 min
+
+# Current auction. Escrow model: coins leave the wallet at bid time and are
+# refunded the moment someone outbids, so a winner can never fail to pay.
+AUCTION: dict = {"period": 0, "item": "", "bid": 0, "bidder": 0, "ends_at": 0.0}
+
+# trade id -> offer. Persisted so a restart mid-trade doesn't silently drop it.
+TRADES: dict[str, dict] = {}
+
+
+def _daily_key() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+def _daily_shop() -> list[tuple[str, int]]:
+    """Today's discounted stock. Same list all day, changes at UTC midnight."""
+    rng = random.Random(f"shop-{_daily_key()}")
+    picks = rng.sample(list(SHOP), k=min(4, len(SHOP)))
+    out = []
+    for iid in picks:
+        discount = rng.choice([10, 15, 20, 25, 30])
+        out.append((iid, max(1, int(SHOP[iid]["price"] * (100 - discount) / 100))))
+    return out
+
+
+def _discount_for(iid: str) -> int:
+    """Percent off today, or 0 if not in the daily rotation."""
+    base = SHOP[iid]["price"]
+    for sid, price in _daily_shop():
+        if sid == iid:
+            return int(round((base - price) / base * 100))
+    return 0
+
+
+def _shop_price(iid: str) -> int:
+    for sid, price in _daily_shop():
+        if sid == iid:
+            return price
+    return SHOP[iid]["price"]
+
+
+def _auction_period() -> int:
+    return int(time.time() // AUCTION_SECONDS)
+
+
+def _auction_lot(period: int) -> tuple[str, int]:
+    rng = random.Random(f"auction-{period}")
+    iid = rng.choice(list(SHOP))
+    return iid, max(100, int(SHOP[iid]["price"] * rng.choice([0.8, 1.0, 1.2])))
+
+
+def _auction_sync() -> str:
+    """Close the finished auction and open the next one. Returns a notice or ''."""
+    global AUCTION
+    period = _auction_period()
+    if AUCTION.get("period") == period:
+        return ""
+
+    notice = ""
+    if AUCTION.get("bidder"):
+        item_id = AUCTION["item"]
+        winner = AUCTION["bidder"]
+        price = AUCTION["bid"]
+        if _owned(winner, item_id) >= SHOP[item_id]["max"]:
+            _eco(winner)["bal"] += price          # at cap: refund instead of losing coins
+            notice = f"⚠️ <@{winner}> already holds the max {SHOP[item_id]['name']}, so **{price:,}** coins were refunded."
+        else:
+            _add_item(winner, item_id, 1)
+            notice = f"🔔 <@{winner}> won **{SHOP[item_id]['name']}** for **{price:,}** coins."
+
+    item_id, start = _auction_lot(period)
+    AUCTION = {
+        "period": period,
+        "item": item_id,
+        "bid": 0,
+        "bidder": 0,
+        "ends_at": (period + 1) * AUCTION_SECONDS,
+    }
+    save_data()
+    return notice
+
+
+@eco_group.command(name="weekly", description="Claim your weekly coins")
+async def eco_weekly(ctx: commands.Context) -> None:
+    """Big payout once every 7 days."""
+    you = _eco(ctx.author.id)
+    wait = ECO_WEEKLY_COOLDOWN - (time.time() - you.get("weekly", 0.0))
+    if wait > 0:
+        await ctx.send(embed=err(f"Already claimed. Next one in **{fmt_duration(wait)}**."))
+        return
+    you["weekly"] = time.time()
+    you["bal"] += ECO_WEEKLY
+    save_data()
+    await ctx.send(embed=ok(
+        f"+{_coins(ECO_WEEKLY)} — you now have {_coins(you['bal'])}", "📅 Weekly"
+    ))
+
+
+@eco_group.command(name="dailyshop", description="Today's discounted stock")
+async def eco_dailyshop(ctx: commands.Context) -> None:
+    """Rotating daily deals — buy with !eco buy."""
+    lines = []
+    for iid, price in _daily_shop():
+        item = SHOP[iid]
+        off = _discount_for(iid)
+        was = f" ~~{item['price']:,}~~" if off else ""
+        lines.append(f"{item['emoji']} **{item['name']}** — {price:,}{was}  ·  **-{off}%**")
+        lines.append(f"-# `{iid}`  {item['effect']}")
+    reset_in = 86400 - (int(time.time()) % 86400)
+    embed = fun("\n".join(lines)[:3900], "🏷 Daily shop")
+    embed.set_footer(text=f"Buy with {PREFIX}eco buy <item>  •  resets in {fmt_duration(reset_in)}")
+    await ctx.send(embed=embed)
+
+
+@eco_group.command(name="auction", description="Show the running auction")
+async def eco_auction(ctx: commands.Context) -> None:
+    """Rotating item auction, every 6 hours."""
+    notice = _auction_sync()
+    item = SHOP[AUCTION["item"]]
+    left = max(0, int(AUCTION["ends_at"] - time.time()))
+    if AUCTION["bidder"]:
+        top = f"**{AUCTION['bid']:,}** coins by <@{AUCTION['bidder']}>"
+        nxt = AUCTION["bid"] + AUCTION_MIN_STEP
+    else:
+        top = "No bids yet"
+        nxt = AUCTION_MIN_STEP
+    embed = fun(
+        f"{item['emoji']} **{item['name']}**\n-# {item['effect']}\n\n"
+        f"**Current bid:** {top}\n"
+        f"**Minimum next bid:** {nxt:,} coins\n"
+        f"**Ends:** <t:{int(AUCTION['ends_at'])}:R>",
+        "🔨 Auction",
+    )
+    embed.set_footer(text=f"Bid with {PREFIX}eco bid <amount>  •  coins are held until you're outbid")
+    if notice:
+        embed.add_field(name="Last result", value=notice, inline=False)
+    await ctx.send(embed=embed)
+
+
+@eco_group.command(name="bid", description="Bid on the auction item")
+async def eco_bid(ctx: commands.Context, amount: int) -> None:
+    """Coins are escrowed immediately and refunded if you're outbid."""
+    notice = _auction_sync()
+    item = SHOP[AUCTION["item"]]
+
+    if AUCTION["bidder"] == ctx.author.id:
+        await ctx.send(embed=err("You're already the highest bidder."))
+        return
+
+    minimum = (AUCTION["bid"] + AUCTION_MIN_STEP) if AUCTION["bidder"] else AUCTION_MIN_STEP
+    if amount < minimum:
+        await ctx.send(embed=err(f"Minimum bid is **{minimum:,}** coins."))
+        return
+
+    wallet = _eco(ctx.author.id)
+    if wallet["bal"] < amount:
+        await ctx.send(embed=err(f"You only have {_coins(wallet['bal'])}."))
+        return
+    if _owned(ctx.author.id, AUCTION["item"]) >= item["max"]:
+        await ctx.send(embed=err(f"You already hold the max {item['name']}."))
+        return
+
+    refunded = ""
+    if AUCTION["bidder"]:
+        prev = AUCTION["bidder"]
+        _eco(prev)["bal"] += AUCTION["bid"]
+        refunded = f"\n<@{prev}> was outbid and refunded **{AUCTION['bid']:,}** coins."
+
+    wallet["bal"] -= amount
+    AUCTION["bid"] = amount
+    AUCTION["bidder"] = ctx.author.id
+    save_data()
+
+    await ctx.send(embed=ok(
+        f"🔨 Bid **{amount:,}** coins on {item['emoji']} **{item['name']}**."
+        f"{refunded}\n\nEnds <t:{int(AUCTION['ends_at'])}:R>. "
+        f"Balance: {_coins(wallet['bal'])}",
+        "Bid placed",
+    ))
+    if notice:
+        await ctx.send(embed=info(notice, "Previous auction"))
+
+
+# ---------------------------------------------------------------------------
+# Trades
+# ---------------------------------------------------------------------------
+
+def _trade_id() -> str:
+    return secrets.token_hex(3)
+
+
+def _my_trade(user_id: int) -> Optional[dict]:
+    now = time.time()
+    for tid in [k for k, t in TRADES.items() if now > t.get("expires", 0)]:
+        TRADES.pop(tid, None)
+    for tid, t in TRADES.items():
+        if user_id in (t["a"], t["b"]):
+            return t
+    return None
+
+
+def _trade_embed(t: dict, title: str = "🤝 Trade offer") -> discord.Embed:
+    def side(uid: int, items: dict, coins: int, ok_flag: bool) -> str:
+        bits = [f"{SHOP[i]['emoji']} {SHOP[i]['name']} ×{n}" for i, n in items.items() if n]
+        if coins:
+            bits.append(f"🪙 {coins:,} coins")
+        body = "\n".join(f"-# {b}" for b in bits) if bits else "-# nothing yet"
+        return f"**<@{uid}>** {'✅' if ok_flag else '⏳'}\n{body}"
+
+    embed = fun(
+        f"{side(t['a'], t['items_a'], t['coins_a'], t['conf_a'])}\n\n"
+        f"↕️\n\n"
+        f"{side(t['b'], t['items_b'], t['coins_b'], t['conf_b'])}\n\n"
+        f"Both sides must run `{PREFIX}eco tradeconfirm`. "
+        f"Expires <t:{int(t['expires'])}:R>.",
+        title,
+    )
+    embed.set_footer(text=f"Add: {PREFIX}eco tradeadd <item> | {PREFIX}eco tradecoins <amount> | {PREFIX}eco tradecancel")
+    return embed
+
+
+def _trade_side(t: dict, uid: int) -> tuple[dict, str, str]:
+    """Return (items, coins_key, confirm_key) for one participant."""
+    if uid == t["a"]:
+        return t["items_a"], "coins_a", "conf_a"
+    return t["items_b"], "coins_b", "conf_b"
+
+
+@eco_group.command(name="trade", description="Start a trade with a member")
+async def eco_trade(ctx: commands.Context, member: discord.Member) -> None:
+    """Open a trade. Then add items/coins and both confirm."""
+    if member.bot:
+        await ctx.send(embed=err("Bots don't trade."))
+        return
+    if member.id == ctx.author.id:
+        await ctx.send(embed=err("You can't trade with yourself."))
+        return
+    if _my_trade(ctx.author.id) or _my_trade(member.id):
+        await ctx.send(embed=err("One of you already has a trade open. Finish or cancel it first."))
+        return
+
+    tid = _trade_id()
+    TRADES[tid] = {
+        "a": ctx.author.id, "b": member.id,
+        "items_a": {}, "items_b": {},
+        "coins_a": 0, "coins_b": 0,
+        "conf_a": False, "conf_b": False,
+        "expires": time.time() + TRADE_TTL,
+        "channel": getattr(ctx.channel, "id", 0),
+    }
+    save_data()
+    await ctx.send(content=member.mention, embed=_trade_embed(TRADES[tid]))
+
+
+@eco_group.command(name="tradeadd", description="Add an item to your side of the trade")
+async def eco_tradeadd(ctx: commands.Context, item: str, amount: int = 1) -> None:
+    """Usage: !eco tradeadd shield 2"""
+    t = _my_trade(ctx.author.id)
+    if t is None:
+        await ctx.send(embed=err(f"No open trade. Start one with `{PREFIX}eco trade @user`."))
+        return
+    iid = _resolve_item(item)
+    if iid is None:
+        await ctx.send(embed=err(f"No such item. Try `{PREFIX}eco inventory`."))
+        return
+    if amount < 1:
+        await ctx.send(embed=err("Add at least 1."))
+        return
+
+    items, _, _ = _trade_side(t, ctx.author.id)
+    if _owned(ctx.author.id, iid) < items.get(iid, 0) + amount:
+        await ctx.send(embed=err(f"You only have **{_owned(ctx.author.id, iid)}** {SHOP[iid]['name']}."))
+        return
+
+    items[iid] = items.get(iid, 0) + amount
+    t["conf_a"] = t["conf_b"] = False
+    save_data()
+    await ctx.send(embed=_trade_embed(t, "🤝 Trade updated"))
+
+
+@eco_group.command(name="tradecoins", description="Set how many coins you're offering")
+async def eco_tradecoins(ctx: commands.Context, amount: int) -> None:
+    """Usage: !eco tradecoins 250 (0 clears)"""
+    t = _my_trade(ctx.author.id)
+    if t is None:
+        await ctx.send(embed=err(f"No open trade. Start one with `{PREFIX}eco trade @user`."))
+        return
+    if amount < 0:
+        await ctx.send(embed=err("Use 0 to clear your coin offer."))
+        return
+    if amount > _eco(ctx.author.id)["bal"]:
+        await ctx.send(embed=err(f"You only have {_coins(_eco(ctx.author.id)['bal'])}."))
+        return
+
+    _, coins_key, _ = _trade_side(t, ctx.author.id)
+    t[coins_key] = amount
+    t["conf_a"] = t["conf_b"] = False
+    save_data()
+    await ctx.send(embed=_trade_embed(t, "🤝 Trade updated"))
+
+
+@eco_group.command(name="tradeconfirm", description="Confirm the trade")
+async def eco_tradeconfirm(ctx: commands.Context) -> None:
+    """Both sides must confirm — then items and coins swap."""
+    t = _my_trade(ctx.author.id)
+    if t is None:
+        await ctx.send(embed=err("No open trade to confirm."))
+        return
+
+    _, _, conf_key = _trade_side(t, ctx.author.id)
+    t[conf_key] = True
+
+    if not (t["conf_a"] and t["conf_b"]):
+        save_data()
+        other = t["b"] if ctx.author.id == t["a"] else t["a"]
+        await ctx.send(embed=_trade_embed(t, "🤝 Waiting for confirmation"))
+        await ctx.send(f"<@{other}> — confirm with `{PREFIX}eco tradeconfirm`.")
+        return
+
+    # --- execute ---
+    problems = []
+    for uid, items, coins in ((t["a"], t["items_a"], t["coins_a"]),
+                              (t["b"], t["items_b"], t["coins_b"])):
+        for iid, n in items.items():
+            if _owned(uid, iid) < n:
+                problems.append(f"<@{uid}> no longer has **{n}× {SHOP[iid]['name']}**")
+        if _eco(uid)["bal"] < coins:
+            problems.append(f"<@{uid}> no longer has **{coins:,}** coins")
+
+    if problems:
+        TRADES.pop(next((k for k, v in TRADES.items() if v is t), ""), None)
+        save_data()
+        await ctx.send(embed=err("Trade cancelled — " + "; ".join(problems) + ".", "❌ Trade failed"))
+        return
+
+    for uid, other, items, coins in ((t["a"], t["b"], t["items_a"], t["coins_a"]),
+                                     (t["b"], t["a"], t["items_b"], t["coins_b"])):
+        for iid, n in items.items():
+            _add_item(uid, iid, -n)
+            _add_item(other, iid, n)
+        if coins:
+            _eco(uid)["bal"] -= coins
+            _eco(other)["bal"] += coins
+
+    for tid in [k for k, v in TRADES.items() if v is t]:
+        TRADES.pop(tid, None)
+    save_data()
+    embed = ok("Trade complete. Items and coins have been swapped.", "🤝 Traded")
+    embed.add_field(name=f"<@{t['a']}> gave", value=("nothing" if not t["items_a"] and not t["coins_a"] else
+        ", ".join([f"{SHOP[i]['name']} ×{n}" for i, n in t["items_a"].items()] + ([f"{t['coins_a']:,} coins"] if t["coins_a"] else []))))
+    embed.add_field(name=f"<@{t['b']}> gave", value=("nothing" if not t["items_b"] and not t["coins_b"] else
+        ", ".join([f"{SHOP[i]['name']} ×{n}" for i, n in t["items_b"].items()] + ([f"{t['coins_b']:,} coins"] if t["coins_b"] else []))))
+    await ctx.send(embed=embed)
+
+
+@eco_group.command(name="tradecancel", description="Cancel your open trade")
+async def eco_tradecancel(ctx: commands.Context) -> None:
+    """Cancel and release both sides."""
+    t = _my_trade(ctx.author.id)
+    if t is None:
+        await ctx.send(embed=err("No open trade."))
+        return
+    for tid in [k for k, v in TRADES.items() if v is t]:
+        TRADES.pop(tid, None)
+    save_data()
+    other = t["b"] if ctx.author.id == t["a"] else t["a"]
+    await ctx.send(embed=info(f"Trade cancelled by {ctx.author.mention}. <@{other}> is free again.", "❌ Cancelled"))
+
+
 # ===========================================================================
 # 8. PERSISTENCE  (warnings + giveaways survive restarts)
 # ===========================================================================
@@ -2766,6 +3151,8 @@ def _serialize() -> dict:
         },
         "economy": {uid: data for uid, data in ECONOMY.items() if data.get("bal") or data.get("daily")},
         "inventory": {uid: items for uid, items in INVENTORY.items() if items},
+        "auction": AUCTION,
+        "trades": {tid: t for tid, t in TRADES.items() if time.time() < t.get("expires", 0)},
         "tickets": {
             str(t.channel_id): {
                 "channel_id": t.channel_id,
@@ -2862,6 +3249,7 @@ async def restore_state() -> None:
             ECONOMY[str(uid)] = {
                 "bal": int(data.get("bal", ECO_START)),
                 "daily": float(data.get("daily", 0.0)),
+                "weekly": float(data.get("weekly", 0.0)),
                 "work": float(data.get("work", 0.0)),
                 "rob": float(data.get("rob", 0.0)),
             }
@@ -2876,6 +3264,35 @@ async def restore_state() -> None:
             if clean:
                 INVENTORY[str(uid)] = clean
                 restored_items += sum(clean.values())
+        except Exception:
+            continue
+
+    saved_auction = raw.get("auction") or {}
+    if saved_auction.get("period"):
+        AUCTION.update({
+            "period": int(saved_auction.get("period", 0)),
+            "item": str(saved_auction.get("item", "")),
+            "bid": int(saved_auction.get("bid", 0)),
+            "bidder": int(saved_auction.get("bidder", 0)),
+            "ends_at": float(saved_auction.get("ends_at", 0.0)),
+        })
+        if AUCTION["item"] not in SHOP:
+            AUCTION["item"] = ""
+
+    for tid, t in (raw.get("trades") or {}).items():
+        try:
+            if time.time() > float(t.get("expires", 0)):
+                continue
+            TRADES[str(tid)] = {
+                "a": int(t["a"]), "b": int(t["b"]),
+                "items_a": {str(k): int(v) for k, v in (t.get("items_a") or {}).items()},
+                "items_b": {str(k): int(v) for k, v in (t.get("items_b") or {}).items()},
+                "coins_a": int(t.get("coins_a", 0)),
+                "coins_b": int(t.get("coins_b", 0)),
+                "conf_a": bool(t.get("conf_a")), "conf_b": bool(t.get("conf_b")),
+                "expires": float(t.get("expires", 0)),
+                "channel": int(t.get("channel", 0)),
+            }
         except Exception:
             continue
 
@@ -3033,6 +3450,14 @@ async def on_ready() -> None:
 
     # Load saved warnings/giveaways and resume any timers
     await restore_state()
+    # Settle any auction that finished while the bot was offline
+    try:
+        notice = _auction_sync()
+        if notice:
+            print(f"Auction settled: {notice}")
+    except Exception as exc:
+        print(f"Auction sync failed: {exc}")
+
     # Re-sync tickets against what actually exists in Discord
     try:
         await reconcile_tickets()
@@ -3150,8 +3575,10 @@ CATEGORIES: dict[str, list[str]] = {
     ],
     "🪙 Economy": [
         "eco balance", "eco daily", "eco work", "eco gamble", "eco pay",
-        "eco rob", "eco leaderboard", "eco shop", "eco buy", "eco inventory",
-        "eco sell", "eco gift",
+        "eco rob", "eco leaderboard", "eco weekly", "eco shop", "eco dailyshop",
+        "eco buy", "eco inventory", "eco sell", "eco gift", "eco auction",
+        "eco bid", "eco trade", "eco tradeadd", "eco tradecoins",
+        "eco tradeconfirm", "eco tradecancel",
     ],
 }
 

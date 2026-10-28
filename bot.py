@@ -302,18 +302,43 @@ async def invite(ctx: commands.Context) -> None:
     await ctx.send(embed=info(f"[Click here to invite me]({url})", "➕ Invite"))
 
 
+async def live_guild_counts(guild: discord.Guild) -> tuple[Optional[int], Optional[int]]:
+    """Fetch fresh member/online counts straight from the API.
+
+    The gateway's cached `member_count` goes stale because join/leave events
+    need the Server Members Intent, which this bot does not request. Asking the
+    REST API every time keeps the number honest.
+    """
+    try:
+        data = await bot.http.get_guild(guild.id, with_counts=True)
+        return data.get("approximate_member_count"), data.get("approximate_presence_count")
+    except Exception:
+        return guild.member_count, None
+
+
 @bot.command(name="membercount", aliases=["mc"])
+@commands.guild_only()
 async def membercount(ctx: commands.Context) -> None:
     """Show how many people are in the server."""
     g = ctx.guild
-    humans = sum(1 for m in g.members if not m.bot) if g.members else "?"
-    bots = sum(1 for m in g.members if m.bot) if g.members else "?"
-    await ctx.send(
-        embed=info(
-            f"**Total:** {g.member_count}\n**Humans:** {humans}\n**Bots:** {bots}",
-            f"👥 {g.name}",
+    total, online = await live_guild_counts(g)
+
+    lines = [f"**Total:** {total}"]
+    if online is not None:
+        lines.append(f"**Online now:** {online}")
+
+    cached = g.members
+    if cached:
+        humans = sum(1 for m in cached if not m.bot)
+        lines.append(f"**Humans:** {humans}")
+        lines.append(f"**Bots:** {len(cached) - humans}")
+    else:
+        lines.append(
+            "\n_Human/bot split needs the **Server Members Intent**: "
+            "Developer Portal \u2192 Bot \u2192 Privileged Gateway Intents._"
         )
-    )
+
+    await ctx.send(embed=info("\n".join(lines), f"👥 {g.name}"))
 
 
 # ===========================================================================
@@ -608,7 +633,9 @@ async def serverinfo(ctx: commands.Context) -> None:
     if g.icon:
         embed.set_thumbnail(url=g.icon.url)
     embed.add_field(name="Owner", value=f"<@{g.owner_id}>")
-    embed.add_field(name="Members", value=str(g.member_count))
+    total, online = await live_guild_counts(g)
+    embed.add_field(name="Members", value=str(total))
+    embed.add_field(name="Online", value=str(online) if online is not None else "—")
     embed.add_field(name="Channels", value=str(len(g.channels)))
     embed.add_field(name="Roles", value=str(len(g.roles)))
     embed.add_field(name="Boosts", value=f"{g.premium_subscription_count} (level {g.premium_tier})")
@@ -2274,6 +2301,8 @@ async def on_ready() -> None:
     print(f"Prefix: {PREFIX}   Commands loaded: {len(bot.commands)}")
     print(f"Watching handle: {WATCH_HANDLE}")
     print(f"Data file: {os.path.abspath(DATA_FILE)}")
+    cached = sum(len(g.members) for g in bot.guilds)
+    print(f"Members intent: {'on' if bot.intents.members else 'off'} — {cached} member(s) cached")
     print("=" * 60)
 
     # Load saved warnings/giveaways and resume any timers
@@ -2385,6 +2414,33 @@ CATEGORIES: dict[str, list[str]] = {
 # ENTRY POINT
 # ===========================================================================
 
+def _members_intent_allowed() -> bool:
+    """Ask Discord whether the Server Members Intent is switched on in the portal.
+
+    Checking the app flags first means we never crash with
+    PrivilegedIntentsRequired if the toggle is off.
+    """
+    override = (os.getenv("MEMBERS_INTENT") or "").strip().lower()
+    if override in ("0", "false", "no", "off"):
+        return False
+    if override in ("1", "true", "yes", "on"):
+        return True
+    try:
+        import json as _json
+        import urllib.request
+
+        req = urllib.request.Request(
+            "https://discord.com/api/v10/oauth2/applications/@me",
+            headers={"Authorization": f"Bot {TOKEN}", "User-Agent": "DiscordBot (synergy, 1.0)"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            flags = int(_json.load(resp).get("flags", 0))
+        return bool(flags & ((1 << 14) | (1 << 15)))  # GUILD_MEMBERS / _LIMITED
+    except Exception as exc:
+        print(f"Could not check the members intent ({exc}) - assuming it is off.")
+        return False
+
+
 def main() -> None:
     if not TOKEN or TOKEN == "PASTE_YOUR_TOKEN_HERE":
         raise SystemExit(
@@ -2408,6 +2464,11 @@ def main() -> None:
                 signal.signal(sig, _on_term)
             except Exception:
                 pass
+
+    # Only request the privileged members intent if the portal toggle is on,
+    # otherwise Discord kills the connection with PrivilegedIntentsRequired.
+    bot.intents.members = _members_intent_allowed()
+    print(f"Server Members Intent: {'on' if bot.intents.members else 'off'}")
 
     try:
         bot.run(TOKEN, log_handler=None)

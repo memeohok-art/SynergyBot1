@@ -1,0 +1,57 @@
+[Unit]
+Description=Synergy Discord bot
+Documentation=https://github.com/memeohok-art/SynergyBot1
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=synergy
+Group=synergy
+WorkingDirectory=/opt/synergy-bot
+
+# Config lives outside the code directory, readable only by the service user
+EnvironmentFile=/opt/synergy-bot/.env
+Environment=PYTHONUNBUFFERED=1
+
+# State lives in /var/lib/synergy-bot and survives git pulls and restarts
+Environment="DATA_FILE=/var/lib/synergy-bot/botdata.json" "TRANSCRIPT_DIR=/var/lib/synergy-bot/transcripts"
+
+ExecStart=/opt/synergy-bot/venv/bin/python -u /opt/synergy-bot/bot.py
+
+# Restart forever, no matter why it died
+Restart=always
+RestartSec=5
+
+# SIGTERM is what makes bot.py flush botdata.json before exiting
+KillSignal=SIGTERM
+KillMode=mixed
+TimeoutStopSec=30
+SendSIGKILL=yes
+
+# --- Hardening -------------------------------------------------------------
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Creates /var/lib/synergy-bot, owned by the service user, and writable
+# even though ProtectSystem=strict makes everything else read-only.
+StateDirectory=synergy-bot
+StateDirectoryMode=0750
+
+# Logs go to journald:  journalctl -u synergy-bot -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=synergy-bot
+
+[Install]
+WantedBy=multi-user.target

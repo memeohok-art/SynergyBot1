@@ -3599,74 +3599,71 @@ async def inv_shortcut(ctx: commands.Context, member: Optional[discord.Member] =
 # 7c. WELCOME (auto-role + owner DM) AND THE YOUTUBER COLLECTING GAME
 # ===========================================================================
 #
-# Prefix-only on purpose: the bot is at 98/100 top-level slash commands, and
-# adding a group here would leave one slot before Discord starts rejecting the
-# whole sync. !guess / !collection cost nothing.
+# Prefix-only on purpose: the bot sits at 98/100 top-level slash commands, so a
+# new group would leave one slot before Discord starts rejecting the whole sync.
 
-YT_SLOT_SECONDS = 1800          # a new YouTuber every 30 minutes
+YT_EVERY_MESSAGES = 30        # a YouTuber drop every 30 messages
+PROMO_EVERY_MESSAGES = 80     # support message every 80 messages
+PROMO_TEXT = "Want to support us? Join the server → https://discord.gg/a2zDpWpXbu"
+RARITY_ORDER = ["legendary", "epic", "rare", "common"]
 
 YOUTUBERS: list[dict] = [
-    {"id": "mrbeast", "name": "MrBeast", "emoji": "🦁", "rarity": "legendary",
+    {"id": "mrbeast", "name": "MrBeast", "emoji": "🦁", "rarity": "legendary", "handle": "MrBeast",
      "aliases": ["mr beast", "jimmy donaldson"], "hint": "Massive challenges, bigger giveaways"},
-    {"id": "pewdiepie", "name": "PewDiePie", "emoji": "👑", "rarity": "legendary",
+    {"id": "pewdiepie", "name": "PewDiePie", "emoji": "👑", "rarity": "legendary", "handle": "PewDiePie",
      "aliases": ["pewds", "felix"], "hint": "The most-subscribed individual for years"},
-    {"id": "markrober", "name": "Mark Rober", "emoji": "🔬", "rarity": "epic",
+    {"id": "markrober", "name": "Mark Rober", "emoji": "🔬", "rarity": "epic", "handle": "MarkRober",
      "aliases": ["mark rober", "rober"], "hint": "Ex-NASA engineer, builds ridiculous science"},
-    {"id": "ksI", "name": "KSI", "emoji": "🥊", "rarity": "epic",
-     "aliases": ["ksi", "jj olatunji"], "hint": "Sidemen co-founder, boxing matches, music"},
-    {"id": "loganpaul", "name": "Logan Paul", "emoji": "🍾", "rarity": "rare",
-     "aliases": ["logan paul", "logan"], "hint": "WWE wrestler turned podcast host"},
-    {"id": "dudeperfect", "name": "Dude Perfect", "emoji": "🏀", "rarity": "epic",
-     "aliases": ["dude perfect", "dudes"], "hint": "Five friends, impossible trick shots"},
-    {"id": "dream", "name": "Dream", "emoji": "💚", "rarity": "epic",
-     "aliases": ["dream"], "hint": "Minecraft manhunt, green smiley mask"},
-    {"id": "technoblade", "name": "Technoblade", "emoji": "🐷", "rarity": "legendary",
+    {"id": "ksi", "name": "KSI", "emoji": "🥊", "rarity": "epic", "handle": "KSI",
+     "aliases": ["jj olatunji"], "hint": "Sidemen co-founder, boxing matches, music"},
+    {"id": "loganpaul", "name": "Logan Paul", "emoji": "🍾", "rarity": "rare", "handle": "LoganPaul",
+     "aliases": ["logan"], "hint": "WWE wrestler turned podcast host"},
+    {"id": "dudeperfect", "name": "Dude Perfect", "emoji": "🏀", "rarity": "epic", "handle": "DudePerfect",
+     "aliases": ["dudes"], "hint": "Five friends, impossible trick shots"},
+    {"id": "dream", "name": "Dream", "emoji": "💚", "rarity": "epic", "handle": "dream",
+     "aliases": [], "hint": "Minecraft manhunt, green smiley mask"},
+    {"id": "technoblade", "name": "Technoblade", "emoji": "🐷", "rarity": "legendary", "handle": "Technothepig",
      "aliases": ["techno", "technoblade"], "hint": "The Blade never dies"},
-    {"id": "jacksepticeye", "name": "Jacksepticeye", "emoji": "🎙", "rarity": "rare",
-     "aliases": ["jack septic eye", "jacksepticeye", "sean"], "hint": "Irish, very loud, PMA"},
-    {"id": "moistcr1tikal", "name": "MoistCr1TiKaL", "emoji": "🥤", "rarity": "rare",
+    {"id": "jacksepticeye", "name": "Jacksepticeye", "emoji": "🎙", "rarity": "rare", "handle": "jacksepticeye",
+     "aliases": ["jack septic eye", "sean"], "hint": "Irish, very loud, PMA"},
+    {"id": "moistcr1tikal", "name": "MoistCr1TiKaL", "emoji": "🥤", "rarity": "rare", "handle": "penguinz0",
      "aliases": ["cr1tikal", "critical", "penguinz0", "moist"], "hint": "Deadpan white t-shirt guy"},
-    {"id": "vanoss", "name": "VanossGaming", "emoji": "🦉", "rarity": "rare",
-     "aliases": ["vanoss", "vanossgaming"], "hint": "Owl mask, GTA and Gmod chaos"},
-    {"id": "dantdm", "name": "DanTDM", "emoji": "💎", "rarity": "rare",
-     "aliases": ["dan tdm", "dantdm", "the diamond minecart"], "hint": "Blue hair, Minecraft royalty"},
-    {"id": "sssniperwolf", "name": "SSSniperWolf", "emoji": "🐺", "rarity": "rare",
-     "aliases": ["sniperwolf", "sssniperwolf", "lia"], "hint": "Reaction videos, wolf in the name"},
-    {"id": "ryantrahan", "name": "Ryan Trahan", "emoji": "🍞", "rarity": "epic",
-     "aliases": ["ryan trahan", "ryan"], "hint": "Travelled across America on one penny a day"},
-    {"id": "airrack", "name": "Airrack", "emoji": "🎈", "rarity": "rare",
-     "aliases": ["airrack"], "hint": "Rented an entire island, absurd stunts"},
-    {"id": "mkbhd", "name": "Marques Brownlee", "emoji": "📱", "rarity": "epic",
-     "aliases": ["mkbhd", "marques brownlee", "marques"], "hint": "The phone review guy, crisp studio"},
-    {"id": "unspeakable", "name": "Unspeakable", "emoji": "🧢", "rarity": "common",
-     "aliases": ["unspeakable"], "hint": "Blue cap, insane challenges"},
-    {"id": "lazarbeam", "name": "LazarBeam", "emoji": "🦘", "rarity": "common",
-     "aliases": ["lazarbeam", "lannan"], "hint": "Australian, Fortnite and bad ideas"},
-    {"id": "sidemen", "name": "Sidemen", "emoji": "⚽", "rarity": "epic",
-     "aliases": ["sidemen", "the sidemen"], "hint": "Seven British lads, charity matches"},
-    {"id": "mrwhosetheboss", "name": "Mrwhosetheboss", "emoji": "🔌", "rarity": "rare",
-     "aliases": ["mrwhosetheboss", "arun"], "hint": "British tech reviews, very orange set"},
+    {"id": "vanoss", "name": "VanossGaming", "emoji": "🦉", "rarity": "rare", "handle": "VanossGaming",
+     "aliases": ["vanoss"], "hint": "Owl mask, GTA and Gmod chaos"},
+    {"id": "dantdm", "name": "DanTDM", "emoji": "💎", "rarity": "rare", "handle": "DanTDM",
+     "aliases": ["dan tdm", "the diamond minecart"], "hint": "Blue hair, Minecraft royalty"},
+    {"id": "sssniperwolf", "name": "SSSniperWolf", "emoji": "🐺", "rarity": "rare", "handle": "SSSniperWolf",
+     "aliases": ["sniperwolf", "lia"], "hint": "Reaction videos, wolf in the name"},
+    {"id": "ryantrahan", "name": "Ryan Trahan", "emoji": "🍞", "rarity": "epic", "handle": "RyanTrahan",
+     "aliases": ["ryan"], "hint": "Travelled across America on one penny a day"},
+    {"id": "airrack", "name": "Airrack", "emoji": "🎈", "rarity": "rare", "handle": "airrack",
+     "aliases": [], "hint": "Rented an entire island, absurd stunts"},
+    {"id": "mkbhd", "name": "Marques Brownlee", "emoji": "📱", "rarity": "epic", "handle": "mkbhd",
+     "aliases": ["mkbhd", "marques"], "hint": "The phone review guy, crisp studio"},
+    {"id": "unspeakable", "name": "Unspeakable", "emoji": "🧢", "rarity": "common", "handle": "Unspeakable",
+     "aliases": [], "hint": "Blue cap, insane challenges"},
+    {"id": "lazarbeam", "name": "LazarBeam", "emoji": "🦘", "rarity": "common", "handle": "LazarBeam",
+     "aliases": ["lannan"], "hint": "Australian, Fortnite and bad ideas"},
+    {"id": "sidemen", "name": "Sidemen", "emoji": "⚽", "rarity": "epic", "handle": "Sidemen",
+     "aliases": ["the sidemen"], "hint": "Seven British lads, charity matches"},
+    {"id": "mrwhosetheboss", "name": "Mrwhosetheboss", "emoji": "🔌", "rarity": "rare", "handle": "Mrwhosetheboss",
+     "aliases": ["arun"], "hint": "British tech reviews, very orange set"},
 ]
 YT_BY_ID = {y["id"]: y for y in YOUTUBERS}
 
-# guild id (str) -> role id / channel id
-SETTINGS: dict = {"autorole": {}, "yt_channel": {}}
-# user id (str) -> {youtuber id: unix ts}
-COLLECTIONS: dict[str, dict[str, int]] = {}
-# the slot currently running and whether it has been posted
-YT_STATE: dict = {"slot": 0, "posted": False}
+SETTINGS: dict = {"autorole": {}, "yt_channel": {}}   # guild id -> role id / channel id
+COLLECTIONS: dict[str, dict[str, int]] = {}          # user id -> {youtuber id: ts}
+MSG_COUNTS: dict[str, int] = {}                      # guild id -> messages seen
+YT_CURRENT: dict = {"id": "", "channel_id": 0, "spawned_at": 0.0}
 
 
-def _yt_slot() -> int:
-    return int(time.time() // YT_SLOT_SECONDS)
+def _yt_image(yt: dict) -> str:
+    """Real YouTube channel avatar, proxied through unavatar."""
+    return f"https://unavatar.io/youtube/@{yt['handle']}"
 
 
-def _yt_for_slot(slot: int) -> dict:
-    return random.Random(f"yt-{slot}").choice(YOUTUBERS)
-
-
-def _yt_seconds_left() -> int:
-    return YT_SLOT_SECONDS - int(time.time() % YT_SLOT_SECONDS)
+def _current_yt() -> Optional[dict]:
+    return YT_BY_ID.get(YT_CURRENT.get("id", ""))
 
 
 def _yt_channel(guild: discord.Guild) -> Optional[discord.TextChannel]:
@@ -3682,62 +3679,81 @@ def _yt_channel(guild: discord.Guild) -> Optional[discord.TextChannel]:
     return guild.system_channel
 
 
-def _yt_embed(yt: dict, slot: int) -> discord.Embed:
+def _rarity_counts(owned_ids) -> dict[str, int]:
+    counts = {r: 0 for r in RARITY_ORDER}
+    for yid in owned_ids:
+        y = YT_BY_ID.get(yid)
+        if y and y["rarity"] in counts:
+            counts[y["rarity"]] += 1
+    return counts
+
+
+def _rarity_line(counts: dict[str, int]) -> str:
+    return " · ".join(f"{r[0].upper()}{counts.get(r, 0)}" for r in RARITY_ORDER)
+
+
+def _yt_embed(yt: dict, first_letter: bool = True) -> discord.Embed:
+    parts = [
+        f"**Hint:** {yt['hint']}",
+        f"**Rarity:** {yt['rarity']}",
+    ]
+    if first_letter:
+        parts.append(f"**First letter:** `{yt['name'][0].upper()}`")
+    parts.append("")
+    parts.append(f"Guess with `{PREFIX}guess <name>` to collect them.")
+
     embed = discord.Embed(
         title="🎯 Who's this YouTuber?",
-        description=(
-            f"{yt['emoji']} **New YouTuber spotted!**\n\n"
-            f"**Hint:** {yt['hint']}\n"
-            f"**Rarity:** {yt['rarity']}\n"
-            f"**First letter:** `{yt['name'][0].upper()}`\n\n"
-            f"Guess with `{PREFIX}guess <name>` to collect them.\n"
-            f"Next one <t:{int((slot + 1) * YT_SLOT_SECONDS)}:R>."
-        ),
+        description="\n".join(parts),
         colour=COLOUR_FUN,
     )
-    embed.set_footer(text=f"{PREFIX}collection to see what you own")
+    embed.set_image(url=_yt_image(yt))
+    embed.set_footer(text=f"{PREFIX}collection to see what you own · {PREFIX}ytlb for the leaderboard")
     return embed
 
 
-async def _yt_tick(force_channel: Optional[discord.TextChannel] = None) -> bool:
-    """Post the current slot's YouTuber once. Returns True if something was sent."""
-    slot = _yt_slot()
-    if not force_channel and YT_STATE.get("slot") == slot and YT_STATE.get("posted"):
+async def _spawn_yt(guild: discord.Guild, channel: Optional[discord.TextChannel] = None) -> bool:
+    """Post a new YouTuber and make them the one to guess."""
+    ch = channel or _yt_channel(guild)
+    if ch is None:
         return False
 
-    yt = _yt_for_slot(slot)
-    targets = [force_channel] if force_channel else [
-        ch for g in bot.guilds if (ch := _yt_channel(g))
-    ]
-    sent = False
-    for ch in targets:
-        try:
-            await ch.send(embed=_yt_embed(yt, slot))
-            sent = True
-        except Exception as exc:
-            print(f"Could not post YouTuber in {getattr(ch, 'name', '?')}: {exc}")
-
-    if sent:
-        YT_STATE["slot"] = slot
-        YT_STATE["posted"] = True
-        save_data()
-    return sent
-
-
-@tasks.loop(minutes=2)
-async def yt_loop() -> None:
+    pool = [y for y in YOUTUBERS if y["id"] != YT_CURRENT.get("id")] or YOUTUBERS
+    yt = random.choice(pool)
     try:
-        await _yt_tick()
-    except Exception as exc:                       # never let the loop die
-        print(f"YouTuber loop error: {exc}")
+        await ch.send(embed=_yt_embed(yt))
+    except Exception as exc:
+        print(f"Could not post YouTuber in {getattr(ch, 'name', '?')}: {exc}")
+        return False
+
+    YT_CURRENT["id"] = yt["id"]
+    YT_CURRENT["channel_id"] = getattr(ch, "id", 0)
+    YT_CURRENT["spawned_at"] = time.time()
+    save_data()
+    return True
+
+
+async def _post_promo(guild: discord.Guild) -> None:
+    ch = _yt_channel(guild)
+    if ch is None:
+        return
+    try:
+        await ch.send(PROMO_TEXT)
+    except Exception as exc:
+        print(f"Could not post promo in {getattr(ch, 'name', '?')}: {exc}")
 
 
 @bot.command(name="yt")
 async def yt_current(ctx: commands.Context) -> None:
     """Show the YouTuber up for grabs right now."""
-    slot = _yt_slot()
-    yt = _yt_for_slot(slot)
-    embed = _yt_embed(yt, slot)
+    yt = _current_yt()
+    if yt is None:
+        await ctx.send(embed=info(
+            f"Nothing to guess yet — a new YouTuber drops every "
+            f"**{YT_EVERY_MESSAGES} messages**.", "🎯 Nothing yet"
+        ))
+        return
+    embed = _yt_embed(yt)
     embed.title = "🎯 Current YouTuber"
     await ctx.send(embed=embed)
 
@@ -3745,22 +3761,25 @@ async def yt_current(ctx: commands.Context) -> None:
 @bot.command(name="guess")
 async def yt_guess(ctx: commands.Context, *, text: str = "") -> None:
     """Guess the current YouTuber's name to collect them."""
+    yt = _current_yt()
+    if yt is None:
+        await ctx.send(embed=err(
+            f"No YouTuber is active. One appears every {YT_EVERY_MESSAGES} messages."
+        ))
+        return
     if not text.strip():
         await ctx.send(embed=err(f"Usage: `{PREFIX}guess MrBeast` — check `{PREFIX}yt` for the hint."))
         return
 
-    slot = _yt_slot()
-    yt = _yt_for_slot(slot)
     answers = {_core(yt["name"])} | {_core(a) for a in yt.get("aliases", [])}
     given = _core(text)
-
     if not given:
         await ctx.send(embed=err("That's not a name I can read."))
         return
 
     if given not in answers:
         await ctx.send(embed=err(
-            f"Not it — that isn't **{yt['emoji']} the current YouTuber**.\n"
+            f"Not **{yt['emoji']} the current YouTuber**.\n"
             f"-# Hint: {yt['hint']} · first letter `{yt['name'][0].upper()}`"
         ))
         return
@@ -3769,22 +3788,22 @@ async def yt_guess(ctx: commands.Context, *, text: str = "") -> None:
     if yt["id"] in mine:
         await ctx.send(embed=info(
             f"You already collected {yt['emoji']} **{yt['name']}**. "
-            f"One new one in **{fmt_duration(_yt_seconds_left())}**.",
-            "Already yours",
+            f"Another one is coming.", "Already yours"
         ))
         return
 
     mine[yt["id"]] = int(time.time())
     save_data()
-    total = len(mine)
+
+    counts = _rarity_counts(mine.keys())
     embed = ok(
         f"🎉 **{yt['name']}** collected!\n\n"
         f"**Rarity:** {yt['rarity']}\n"
-        f"**Your collection:** {total}/{len(YOUTUBERS)}\n"
-        f"Next YouTuber <t:{int((slot + 1) * YT_SLOT_SECONDS)}:R>.",
+        f"**Your collection:** {len(mine)}/{len(YOUTUBERS)}\n"
+        f"**Breakdown:** {_rarity_line(counts)}",
         "✅ Correct!",
     )
-    embed.set_thumbnail(url=None)
+    embed.set_thumbnail(url=_yt_image(yt))
     await ctx.send(embed=embed)
 
 
@@ -3801,12 +3820,14 @@ async def yt_collection(ctx: commands.Context, member: Optional[discord.Member] 
         ))
         return
 
-    order = {"legendary": 0, "epic": 1, "rare": 2, "common": 3}
+    order = {r: i for i, r in enumerate(RARITY_ORDER)}
     owned = [YT_BY_ID[i] for i in mine if i in YT_BY_ID]
     owned.sort(key=lambda y: (order.get(y["rarity"], 9), y["name"]))
     lines = [f"{y['emoji']} **{y['name']}** · {y['rarity']}" for y in owned]
+    counts = _rarity_counts(mine.keys())
 
     embed = fun("\n".join(lines)[:3900], f"🎒 {target.display_name}'s collection")
+    embed.add_field(name="By rarity", value=_rarity_line(counts), inline=True)
     embed.set_footer(text=f"{len(owned)}/{len(YOUTUBERS)} collected")
     missing = [y["name"] for y in YOUTUBERS if y["id"] not in mine]
     if missing:
@@ -3814,14 +3835,61 @@ async def yt_collection(ctx: commands.Context, member: Optional[discord.Member] 
     await ctx.send(embed=embed)
 
 
+@bot.command(name="ytlb", aliases=["topcollect", "ytleaderboard"])
+async def yt_leaderboard(ctx: commands.Context) -> None:
+    """Leaderboard of who has collected the most YouTubers."""
+    rows = []
+    server_totals = {r: 0 for r in RARITY_ORDER}
+    for uid, owned in COLLECTIONS.items():
+        if not owned:
+            continue
+        counts = _rarity_counts(owned.keys())
+        for r in RARITY_ORDER:
+            server_totals[r] += counts[r]
+        rows.append((uid, len(owned), counts))
+
+    if not rows:
+        await ctx.send(embed=info(
+            f"Nobody has collected anything yet.\n"
+            f"A YouTuber appears every {YT_EVERY_MESSAGES} messages — "
+            f"see `{PREFIX}yt`, then `{PREFIX}guess <name>`.",
+            "🏆 Collection leaderboard",
+        ))
+        return
+
+    rows.sort(key=lambda r: (-r[1], -r[2]["legendary"], -r[2]["epic"], -r[2]["rare"]))
+    medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+    lines = []
+    for i, (uid, total, counts) in enumerate(rows[:10], 1):
+        tag = medals.get(i, f"`{i}.`")
+        lines.append(f"{tag} <@{uid}> — **{total}** · `{_rarity_line(counts)}`")
+
+    embed = fun("\n".join(lines)[:3900], "🏆 Collection leaderboard")
+    embed.add_field(
+        name="Rarity breakdown (server-wide)",
+        value="\n".join(
+            f"{r.capitalize()}: **{server_totals[r]}**" for r in RARITY_ORDER
+        ),
+        inline=False,
+    )
+    unique = len({y for owned in COLLECTIONS.values() for y in owned})
+    embed.set_footer(
+        text=f"{len(rows)} collector(s) · {unique}/{len(YOUTUBERS)} YouTubers claimed · "
+             f"drops every {YT_EVERY_MESSAGES} messages · L E R C = legendary/epic/rare/common"
+    )
+    await ctx.send(embed=embed)
+
+
 @bot.command(name="ytset")
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def yt_set(ctx: commands.Context, channel: discord.TextChannel) -> None:
-    """Choose where the YouTuber drops appear."""
+    """Choose where YouTuber drops and support messages appear."""
     SETTINGS["yt_channel"][str(ctx.guild.id)] = channel.id
     save_data()
-    await ctx.send(embed=ok(f"YouTuber drops will post in {channel.mention}.", "✅ Saved"))
+    await ctx.send(embed=ok(
+        f"Drops and support messages will post in {channel.mention}.", "✅ Saved"
+    ))
 
 
 @bot.command(name="ytspawn")
@@ -3829,7 +3897,7 @@ async def yt_set(ctx: commands.Context, channel: discord.TextChannel) -> None:
 @commands.has_permissions(manage_guild=True)
 async def yt_spawn(ctx: commands.Context) -> None:
     """Force one YouTuber drop right here (staff only)."""
-    if await _yt_tick(force_channel=ctx.channel):
+    if await _spawn_yt(ctx.guild, ctx.channel):
         await ctx.send(embed=ok("Dropped one here.", "🎯"), delete_after=5)
     else:
         await ctx.send(embed=err("Couldn't post the drop here."))
@@ -3925,7 +3993,8 @@ def _serialize() -> dict:
         "stock": STOCK,
         "settings": SETTINGS,
         "collections": {uid: c for uid, c in COLLECTIONS.items() if c},
-        "yt_state": YT_STATE,
+        "yt_current": YT_CURRENT,
+        "msg_counts": MSG_COUNTS,
         "auction": AUCTION,
         "trades": {tid: t for tid, t in TRADES.items() if time.time() < t.get("expires", 0)},
         "tickets": {
@@ -4071,10 +4140,17 @@ async def restore_state() -> None:
         except Exception:
             continue
 
-    saved_yt = raw.get("yt_state") or {}
-    if saved_yt:
-        YT_STATE["slot"] = int(saved_yt.get("slot", 0))
-        YT_STATE["posted"] = bool(saved_yt.get("posted"))
+    saved_yt = raw.get("yt_current") or {}
+    if saved_yt.get("id") in YT_BY_ID:
+        YT_CURRENT["id"] = saved_yt["id"]
+        YT_CURRENT["channel_id"] = int(saved_yt.get("channel_id", 0))
+        YT_CURRENT["spawned_at"] = float(saved_yt.get("spawned_at", 0.0))
+
+    for gid, n in (raw.get("msg_counts") or {}).items():
+        try:
+            MSG_COUNTS[str(gid)] = int(n)
+        except (TypeError, ValueError):
+            continue
 
     saved_stock = raw.get("stock") or {}
     if saved_stock.get("period") and int(saved_stock["period"]) == _restock_period():
@@ -4269,10 +4345,6 @@ async def on_ready() -> None:
     # Load saved warnings/giveaways and resume any timers
     await restore_state()
 
-    # Start the 30-minute YouTuber drop loop (once, even across reconnects)
-    if not yt_loop.is_running():
-        yt_loop.start()
-        print("YouTuber drop loop started (a new one every 30 minutes)")
     # Settle any auction that finished while the bot was offline
     try:
         notice = _auction_sync()
@@ -4355,6 +4427,17 @@ async def on_member_join(member: discord.Member) -> None:
 async def on_message(message: discord.Message) -> None:
     if message.author.bot:
         return
+
+    # --- message-driven drops and support messages ---
+    if message.guild is not None:
+        key = str(message.guild.id)
+        n = MSG_COUNTS.get(key, 0) + 1
+        MSG_COUNTS[key] = n
+        mark_dirty()
+        if n % YT_EVERY_MESSAGES == 0:
+            asyncio.create_task(_spawn_yt(message.guild))
+        if n % PROMO_EVERY_MESSAGES == 0:
+            asyncio.create_task(_post_promo(message.guild))
 
     # AFK auto-clear
     if message.author.id in AFK and not message.content.startswith(PREFIX):
@@ -4454,7 +4537,7 @@ CATEGORIES: dict[str, list[str]] = {
         "eco profile", "eco stats", "eco daily", "eco work", "eco balance",
         "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
     ],
-    "🎮 YouTuber game": ["yt", "guess", "collection", "ytspawn", "ytset"],
+    "🎮 YouTuber game": ["yt", "guess", "collection", "ytlb", "ytspawn", "ytset"],
     "👋 Welcome": ["autorole"],
     "🛒 Market": [
         "wallet", "shop", "inv",

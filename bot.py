@@ -37,6 +37,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from urllib.parse import quote as urlquote   # 'quote' is a command name here
 
 import discord
 from discord.ext import commands, tasks
@@ -3826,14 +3827,26 @@ YT_CURRENT: dict = {"id": "", "channel_id": 0, "spawned_at": 0.0}
 
 
 def _yt_image(yt: dict) -> str:
-    """Real YouTube avatar where the handle was verified, else a generated one.
+    """Real YouTube channel avatar, with a generated one as a backend fallback.
 
-    unavatar rate-limits hard (429s under load), so an unverified handle would
-    risk a broken image in the embed. DiceBear always resolves.
+    unavatar resolves by handle or channel name. ?fallback= means a channel it
+    cannot find degrades to a DiceBear avatar instead of a broken image, so the
+    card always renders. Anything set with !ytavatar wins outright.
     """
-    if yt.get("verified_handle") and yt.get("handle"):
-        return f"https://unavatar.io/youtube/@{yt['handle']}"
-    return f"https://api.dicebear.com/9.x/bottts/png?size=512&seed={yt['id']}"
+    override = SETTINGS.get("yt_avatar", {}).get(yt["id"])
+    if override:
+        return override
+    handle = yt.get("handle") or yt["name"]
+    fallback = f"https://api.dicebear.com/9.x/bottts/png?size=512&seed={yt['id']}"
+    return (
+        f"https://unavatar.io/youtube/{urlquote(handle)}"
+        f"?fallback={urlquote(fallback, safe='')}"
+    )
+
+
+def _yt_emoji(yt: dict) -> str:
+    """Emoji shown for a creator — a custom emoji if one was set with !ytemoji."""
+    return SETTINGS.get("yt_emoji", {}).get(yt["id"]) or yt.get("emoji", "🎬")
 
 
 def _current_yt() -> Optional[dict]:
@@ -3868,7 +3881,7 @@ def _rarity_line(counts: dict[str, int]) -> str:
 
 def _yt_embed(yt: dict, first_letter: bool = True) -> discord.Embed:
     parts = [
-        f"**Hint:** {yt['hint']}",
+        f"{_yt_emoji(yt)} **Hint:** {yt['hint']}",
         f"**Rarity:** {yt['rarity']}",
     ]
     if yt.get("subs"):
@@ -3955,7 +3968,7 @@ async def yt_guess(ctx: commands.Context, *, text: str = "") -> None:
 
     if given not in answers:
         await ctx.send(embed=err(
-            f"Not **{yt['emoji']} the current YouTuber**.\n"
+            f"Not **{_yt_emoji(yt)} the current YouTuber**.\n"
             f"-# Hint: {yt['hint']} · first letter `{yt['name'][0].upper()}`"
         ))
         return
@@ -4004,7 +4017,7 @@ async def yt_collection(ctx: commands.Context, member: Optional[discord.Member] 
         v = mine.get(yid, 1)
         return int(v) if isinstance(v, int) else 1
     lines = [
-        f"{y['emoji']} **{y['name']}** · {y['rarity']}"
+        f"{_yt_emoji(y)} **{y['name']}** · {y['rarity']}"
         + (f" · **×{_cnt(y['id'])}**" if _cnt(y["id"]) > 1 else "")
         for y in owned
     ]
@@ -4289,11 +4302,69 @@ async def yt_dupes(ctx: commands.Context, member: Optional[discord.Member] = Non
         ))
         return
     dupes.sort(key=lambda x: -x[1])
-    lines = [f"{YT_BY_ID[y]['emoji']} **{YT_BY_ID[y]['name']}** ×{c} · {YT_BY_ID[y]['rarity']}"
+    lines = [f"{_yt_emoji(YT_BY_ID[y])} **{YT_BY_ID[y]['name']}** ×{c} · {YT_BY_ID[y]['rarity']}"
              for y, c in dupes]
     embed = fun("\n".join(lines)[:3900], f"🔁 {target.display_name}'s duplicates")
     embed.set_footer(text=f"{PREFIX}yttrade @user <yours> for <theirs>")
     await ctx.send(embed=embed)
+
+
+@bot.command(name="ytavatar")
+@commands.has_permissions(manage_guild=True)
+async def yt_avatar(ctx: commands.Context, creator: str, *, source: str = "") -> None:
+    """Set a creator's avatar. Usage: !ytavatar Kryvora https://... or !ytavatar Kryvora Kryvora
+    Use `clear` to go back to automatic lookup."""
+    yt = _resolve_yt(creator)
+    if yt is None:
+        await ctx.send(embed=err(f"No creator called `{creator}`. Try `{PREFIX}yt` or part of the name."))
+        return
+
+    SETTINGS.setdefault("yt_avatar", {})
+    if not source or source.strip().lower() == "clear":
+        SETTINGS["yt_avatar"].pop(yt["id"], None)
+        save_data()
+        await ctx.send(embed=ok(f"{yt['name']} is back to automatic lookup.", "🖼 Avatar cleared"))
+        return
+
+    src_text = source.strip()
+    if src_text.startswith("http://") or src_text.startswith("https://"):
+        SETTINGS["yt_avatar"][yt["id"]] = src_text
+    else:
+        # treat it as a YouTube handle / channel name
+        fallback = f"https://api.dicebear.com/9.x/bottts/png?size=512&seed={yt['id']}"
+        SETTINGS["yt_avatar"][yt["id"]] = (
+            f"https://unavatar.io/youtube/{urlquote(src_text.lstrip('@'))}"
+            f"?fallback={urlquote(fallback, safe='')}"
+        )
+    save_data()
+
+    embed = ok(f"Avatar for **{yt['name']}** updated.", "🖼 Avatar set")
+    embed.set_thumbnail(url=_yt_image(yt))
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="ytemoji")
+@commands.has_permissions(manage_guild=True)
+async def yt_emoji(ctx: commands.Context, creator: str, *, emoji: str = "") -> None:
+    """Set a creator's emoji — works with custom server emoji.
+    Usage: !ytemoji Kryvora <:kryvora:1234567890>   (clear with `clear`)"""
+    yt = _resolve_yt(creator)
+    if yt is None:
+        await ctx.send(embed=err(f"No creator called `{creator}`."))
+        return
+
+    SETTINGS.setdefault("yt_emoji", {})
+    if not emoji or emoji.strip().lower() == "clear":
+        SETTINGS["yt_emoji"].pop(yt["id"], None)
+        save_data()
+        await ctx.send(embed=ok(f"{yt['name']} is back to {yt.get('emoji', '🎬')}.", "🎬 Emoji cleared"))
+        return
+
+    SETTINGS["yt_emoji"][yt["id"]] = emoji.strip()
+    save_data()
+    await ctx.send(embed=ok(
+        f"Emoji for **{yt['name']}** set to {emoji.strip()}", "🎬 Emoji set"
+    ))
 
 
 @bot.command(name="ytset")
@@ -4541,6 +4612,12 @@ async def restore_state() -> None:
                 BUFFS[str(uid)] = live
         except Exception:
             continue
+
+    for key in ("yt_avatar", "yt_emoji"):
+        SETTINGS.setdefault(key, {})
+        for yid, val in ((raw.get("settings") or {}).get(key) or {}).items():
+            if yid in YT_BY_ID and isinstance(val, str):
+                SETTINGS[key][yid] = val
 
     for key, dest in (("autorole", SETTINGS["autorole"]), ("yt_channel", SETTINGS["yt_channel"])):
         for gid, val in ((raw.get("settings") or {}).get(key) or {}).items():
@@ -4975,7 +5052,8 @@ CATEGORIES: dict[str, list[str]] = {
         "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
     ],
     "🎮 YouTuber game": ["yt", "guess", "collection", "dupes", "ytlb",
-                          "yttrade", "yttradeaccept", "yttradecancel", "ytspawn", "ytset"],
+                          "yttrade", "yttradeaccept", "yttradecancel",
+                          "ytspawn", "ytset", "ytavatar", "ytemoji"],
     "👋 Welcome": ["autorole"],
     "🛒 Market": [
         "wallet", "shop", "inv",

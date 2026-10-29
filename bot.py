@@ -3608,46 +3608,214 @@ PROMO_TEXT = "Want to support us? Join the server → https://discord.gg/a2zDpWp
 RARITY_ORDER = ["legendary", "epic", "rare", "common"]
 
 YOUTUBERS: list[dict] = [
-    {"id": "mrbeast", "name": "MrBeast", "emoji": "🦁", "rarity": "legendary", "handle": "MrBeast",
+    {"id": "mrbeast", "name": "MrBeast", "emoji": "🦁", "rarity": "legendary", "handle": "MrBeast", "verified_handle": True,
      "aliases": ["mr beast", "jimmy donaldson"], "hint": "Massive challenges, bigger giveaways"},
-    {"id": "pewdiepie", "name": "PewDiePie", "emoji": "👑", "rarity": "legendary", "handle": "PewDiePie",
+    {"id": "pewdiepie", "name": "PewDiePie", "emoji": "👑", "rarity": "legendary", "handle": "PewDiePie", "verified_handle": True,
      "aliases": ["pewds", "felix"], "hint": "The most-subscribed individual for years"},
-    {"id": "markrober", "name": "Mark Rober", "emoji": "🔬", "rarity": "epic", "handle": "MarkRober",
+    {"id": "markrober", "name": "Mark Rober", "emoji": "🔬", "rarity": "epic", "handle": "MarkRober", "verified_handle": True,
      "aliases": ["mark rober", "rober"], "hint": "Ex-NASA engineer, builds ridiculous science"},
-    {"id": "ksi", "name": "KSI", "emoji": "🥊", "rarity": "epic", "handle": "KSI",
+    {"id": "ksi", "name": "KSI", "emoji": "🥊", "rarity": "epic", "handle": "KSI", "verified_handle": True,
      "aliases": ["jj olatunji"], "hint": "Sidemen co-founder, boxing matches, music"},
-    {"id": "loganpaul", "name": "Logan Paul", "emoji": "🍾", "rarity": "rare", "handle": "LoganPaul",
+    {"id": "loganpaul", "name": "Logan Paul", "emoji": "🍾", "rarity": "rare", "handle": "LoganPaul", "verified_handle": True,
      "aliases": ["logan"], "hint": "WWE wrestler turned podcast host"},
-    {"id": "dudeperfect", "name": "Dude Perfect", "emoji": "🏀", "rarity": "epic", "handle": "DudePerfect",
+    {"id": "dudeperfect", "name": "Dude Perfect", "emoji": "🏀", "rarity": "epic", "handle": "DudePerfect", "verified_handle": True,
      "aliases": ["dudes"], "hint": "Five friends, impossible trick shots"},
-    {"id": "dream", "name": "Dream", "emoji": "💚", "rarity": "epic", "handle": "dream",
+    {"id": "dream", "name": "Dream", "emoji": "💚", "rarity": "epic", "handle": "dream", "verified_handle": True,
      "aliases": [], "hint": "Minecraft manhunt, green smiley mask"},
-    {"id": "technoblade", "name": "Technoblade", "emoji": "🐷", "rarity": "legendary", "handle": "Technothepig",
+    {"id": "technoblade", "name": "Technoblade", "emoji": "🐷", "rarity": "legendary", "handle": "Technothepig", "verified_handle": True,
      "aliases": ["techno", "technoblade"], "hint": "The Blade never dies"},
-    {"id": "jacksepticeye", "name": "Jacksepticeye", "emoji": "🎙", "rarity": "rare", "handle": "jacksepticeye",
+    {"id": "jacksepticeye", "name": "Jacksepticeye", "emoji": "🎙", "rarity": "rare", "handle": "jacksepticeye", "verified_handle": True,
      "aliases": ["jack septic eye", "sean"], "hint": "Irish, very loud, PMA"},
-    {"id": "moistcr1tikal", "name": "MoistCr1TiKaL", "emoji": "🥤", "rarity": "rare", "handle": "penguinz0",
+    {"id": "moistcr1tikal", "name": "MoistCr1TiKaL", "emoji": "🥤", "rarity": "rare", "handle": "penguinz0", "verified_handle": True,
      "aliases": ["cr1tikal", "critical", "penguinz0", "moist"], "hint": "Deadpan white t-shirt guy"},
-    {"id": "vanoss", "name": "VanossGaming", "emoji": "🦉", "rarity": "rare", "handle": "VanossGaming",
+    {"id": "vanoss", "name": "VanossGaming", "emoji": "🦉", "rarity": "rare", "handle": "VanossGaming", "verified_handle": True,
      "aliases": ["vanoss"], "hint": "Owl mask, GTA and Gmod chaos"},
-    {"id": "dantdm", "name": "DanTDM", "emoji": "💎", "rarity": "rare", "handle": "DanTDM",
+    {"id": "dantdm", "name": "DanTDM", "emoji": "💎", "rarity": "rare", "handle": "DanTDM", "verified_handle": True,
      "aliases": ["dan tdm", "the diamond minecart"], "hint": "Blue hair, Minecraft royalty"},
-    {"id": "sssniperwolf", "name": "SSSniperWolf", "emoji": "🐺", "rarity": "rare", "handle": "SSSniperWolf",
+    {"id": "sssniperwolf", "name": "SSSniperWolf", "emoji": "🐺", "rarity": "rare", "handle": "SSSniperWolf", "verified_handle": True,
      "aliases": ["sniperwolf", "lia"], "hint": "Reaction videos, wolf in the name"},
-    {"id": "ryantrahan", "name": "Ryan Trahan", "emoji": "🍞", "rarity": "epic", "handle": "RyanTrahan",
+    {"id": "ryantrahan", "name": "Ryan Trahan", "emoji": "🍞", "rarity": "epic", "handle": "RyanTrahan", "verified_handle": True,
      "aliases": ["ryan"], "hint": "Travelled across America on one penny a day"},
-    {"id": "airrack", "name": "Airrack", "emoji": "🎈", "rarity": "rare", "handle": "airrack",
+    {"id": "airrack", "name": "Airrack", "emoji": "🎈", "rarity": "rare", "handle": "airrack", "verified_handle": True,
      "aliases": [], "hint": "Rented an entire island, absurd stunts"},
-    {"id": "mkbhd", "name": "Marques Brownlee", "emoji": "📱", "rarity": "epic", "handle": "mkbhd",
+    {"id": "mkbhd", "name": "Marques Brownlee", "emoji": "📱", "rarity": "epic", "handle": "mkbhd", "verified_handle": True,
      "aliases": ["mkbhd", "marques"], "hint": "The phone review guy, crisp studio"},
-    {"id": "unspeakable", "name": "Unspeakable", "emoji": "🧢", "rarity": "common", "handle": "Unspeakable",
+    {"id": "unspeakable", "name": "Unspeakable", "emoji": "🧢", "rarity": "common", "handle": "Unspeakable", "verified_handle": True,
      "aliases": [], "hint": "Blue cap, insane challenges"},
-    {"id": "lazarbeam", "name": "LazarBeam", "emoji": "🦘", "rarity": "common", "handle": "LazarBeam",
+    {"id": "lazarbeam", "name": "LazarBeam", "emoji": "🦘", "rarity": "common", "handle": "LazarBeam", "verified_handle": True,
      "aliases": ["lannan"], "hint": "Australian, Fortnite and bad ideas"},
-    {"id": "sidemen", "name": "Sidemen", "emoji": "⚽", "rarity": "epic", "handle": "Sidemen",
+    {"id": "sidemen", "name": "Sidemen", "emoji": "⚽", "rarity": "epic", "handle": "Sidemen", "verified_handle": True,
      "aliases": ["the sidemen"], "hint": "Seven British lads, charity matches"},
-    {"id": "mrwhosetheboss", "name": "Mrwhosetheboss", "emoji": "🔌", "rarity": "rare", "handle": "Mrwhosetheboss",
+    {"id": "mrwhosetheboss", "name": "Mrwhosetheboss", "emoji": "🔌", "rarity": "rare", "handle": "Mrwhosetheboss", "verified_handle": True,
      "aliases": ["arun"], "hint": "British tech reviews, very orange set"},
+    {"id": "kryvora", "name": "Kryvora", "emoji": "🎬", "rarity": "legendary", "handle": "Kryvora", "subs": 351,
+     "aliases": [], "hint": "351 subscribers — and climbing"},
+    {"id": "ninja", "name": "Ninja", "emoji": "🎬", "rarity": "legendary", "handle": "Ninja",
+     "aliases": [], "hint": "The blue-haired Fortnite pro who blew up on Twitch"},
+    {"id": "pokimane", "name": "Pokimane", "emoji": "🎬", "rarity": "legendary", "handle": "pokimane",
+     "aliases": [], "hint": "One of Twitch's most-followed streamers"},
+    {"id": "xqc", "name": "xQc", "emoji": "🎬", "rarity": "legendary", "handle": "xQc",
+     "aliases": [], "hint": "Overwatch pro turned chaotic variety streamer"},
+    {"id": "ludwig", "name": "Ludwig", "emoji": "🎬", "rarity": "legendary", "handle": "Ludwig",
+     "aliases": [], "hint": "Chess boxing and Mogul Chessboxing"},
+    {"id": "valkyrae", "name": "Valkyrae", "emoji": "🎬", "rarity": "epic", "handle": "Valkyrae",
+     "aliases": [], "hint": "100 Thieves co-owner, Among Us queen"},
+    {"id": "sykkuno", "name": "Sykkuno", "emoji": "🎬", "rarity": "epic", "handle": "Sykkuno",
+     "aliases": [], "hint": "Soft-spoken, defies every streaming expectation"},
+    {"id": "disguisedtoast", "name": "Disguised Toast", "emoji": "🎬", "rarity": "epic", "handle": "DisguisedToast",
+     "aliases": [], "hint": "Card games, then everything else"},
+    {"id": "timthetatman", "name": "TimTheTatman", "emoji": "🎬", "rarity": "epic", "handle": "TimTheTatman",
+     "aliases": [], "hint": "Big laugh, bigger Warzone plays"},
+    {"id": "drdisrespect", "name": "Dr Disrespect", "emoji": "🎬", "rarity": "legendary", "handle": "DrDisrespect",
+     "aliases": [], "hint": "Two-time back-to-back champion"},
+    {"id": "hasanabi", "name": "HasanAbi", "emoji": "🎬", "rarity": "epic", "handle": "HasanAbi",
+     "aliases": [], "hint": "Politics and reaction streams, very loud"},
+    {"id": "sypherpk", "name": "SypherPK", "emoji": "🎬", "rarity": "rare", "handle": "SypherPK",
+     "aliases": [], "hint": "Fortnite tips with a calming voice"},
+    {"id": "nickmercs", "name": "NICKMERCS", "emoji": "🎬", "rarity": "rare", "handle": "NICKMERCS",
+     "aliases": [], "hint": "MNM gaming, Warzone drops"},
+    {"id": "courage", "name": "CouRage", "emoji": "🎬", "rarity": "rare", "handle": "couragejd",
+     "aliases": [], "hint": "High-energy casting turned streaming"},
+    {"id": "drlupo", "name": "DrLupo", "emoji": "🎬", "rarity": "rare", "handle": "DrLupo",
+     "aliases": [], "hint": "Charity streams, calm aim"},
+    {"id": "summit1g", "name": "summit1g", "emoji": "🎬", "rarity": "rare", "handle": "summit1g",
+     "aliases": [], "hint": "Counter-Strike veteran, variety now"},
+    {"id": "jerma985", "name": "Jerma985", "emoji": "🎬", "rarity": "epic", "handle": "Jerma985",
+     "aliases": [], "hint": "The one who is definitely a real person"},
+    {"id": "northernlion", "name": "Northernlion", "emoji": "🎬", "rarity": "rare", "handle": "Northernlion",
+     "aliases": [], "hint": "Binding of Isaac forever"},
+    {"id": "tommyinnit", "name": "TommyInnit", "emoji": "🎬", "rarity": "epic", "handle": "TommyInnit",
+     "aliases": [], "hint": "Loud British Minecraft chaos"},
+    {"id": "wilbursoot", "name": "Wilbur Soot", "emoji": "🎬", "rarity": "epic", "handle": "WilburSoot",
+     "aliases": [], "hint": "Musician and Minecraft storyteller"},
+    {"id": "quackity", "name": "Quackity", "emoji": "🎬", "rarity": "rare", "handle": "Quackity",
+     "aliases": [], "hint": "Spanish and English, endless projects"},
+    {"id": "georgenotfound", "name": "GeorgeNotFound", "emoji": "🎬", "rarity": "rare", "handle": "GeorgeNotFound",
+     "aliases": [], "hint": "Dream's colour-blind friend"},
+    {"id": "sapnap", "name": "Sapnap", "emoji": "🎬", "rarity": "rare", "handle": "Sapnap",
+     "aliases": [], "hint": "Minecraft PvP, green and orange"},
+    {"id": "karljacobs", "name": "Karl Jacobs", "emoji": "🎬", "rarity": "rare", "handle": "KarlJacobs",
+     "aliases": [], "hint": "Tales from the SMP, bright hoodies"},
+    {"id": "tubbo", "name": "Tubbo", "emoji": "🎬", "rarity": "common", "handle": "Tubbo",
+     "aliases": [], "hint": "Bees, nukes and Minecraft"},
+    {"id": "ranboo", "name": "Ranboo", "emoji": "🎬", "rarity": "rare", "handle": "Ranboo",
+     "aliases": [], "hint": "Memory-loss jokes and genloss"},
+    {"id": "philza", "name": "Philza", "emoji": "🎬", "rarity": "rare", "handle": "Philza",
+     "aliases": [], "hint": "Hardcore Minecraft, crow father"},
+    {"id": "corpsehusband", "name": "Corpse Husband", "emoji": "🎬", "rarity": "epic", "handle": "CorpseHusband",
+     "aliases": [], "hint": "That voice, no face"},
+    {"id": "preston", "name": "Preston", "emoji": "🎬", "rarity": "common", "handle": "PrestonPlayz",
+     "aliases": [], "hint": "Minecraft and Fortnite challenges"},
+    {"id": "codyko", "name": "Cody Ko", "emoji": "🎬", "rarity": "rare", "handle": "codyko",
+     "aliases": [], "hint": "That's cringe, commentary king"},
+    {"id": "noelmiller", "name": "Noel Miller", "emoji": "🎬", "rarity": "common", "handle": "NoelMiller",
+     "aliases": [], "hint": "Cody's podcast partner in crime"},
+    {"id": "kurtisconner", "name": "Kurtis Conner", "emoji": "🎬", "rarity": "rare", "handle": "kurtisconner",
+     "aliases": [], "hint": "Canadian commentary, big hair"},
+    {"id": "dannygonzalez", "name": "Danny Gonzalez", "emoji": "🎬", "rarity": "rare", "handle": "dannygonzalez",
+     "aliases": [], "hint": "Greg, and questionable content"},
+    {"id": "drewgooden", "name": "Drew Gooden", "emoji": "🎬", "rarity": "rare", "handle": "drewgooden",
+     "aliases": [], "hint": "Road work ahead? Deadpan reviews"},
+    {"id": "jarvisjohnson", "name": "Jarvis Johnson", "emoji": "🎬", "rarity": "rare", "handle": "JarvisJohnson",
+     "aliases": [], "hint": "Ex-tech, now commentary gold"},
+    {"id": "eddyburback", "name": "Eddy Burback", "emoji": "🎬", "rarity": "common", "handle": "eddyburback",
+     "aliases": [], "hint": "Theme parks and internet rabbit holes"},
+    {"id": "philipdefranco", "name": "Philip DeFranco", "emoji": "🎬", "rarity": "epic", "handle": "PhilipDeFranco",
+     "aliases": [], "hint": "Daily news, 'sup you beautiful bastards"},
+    {"id": "h3podcast", "name": "H3 Podcast", "emoji": "🎬", "rarity": "rare", "handle": "H3Podcast",
+     "aliases": [], "hint": "Ethan and Hila, long-form pods"},
+    {"id": "dharmann", "name": "Dhar Mann", "emoji": "🎬", "rarity": "common", "handle": "DharMann",
+     "aliases": [], "hint": "So you see, morals are important"},
+    {"id": "ryanhiga", "name": "Ryan Higa", "emoji": "🎬", "rarity": "rare", "handle": "RyanHiga",
+     "aliases": [], "hint": "NigaHiga, the OG of YouTube comedy"},
+    {"id": "zachking", "name": "Zach King", "emoji": "🎬", "rarity": "epic", "handle": "ZachKing",
+     "aliases": [], "hint": "Magic vines, digital illusions"},
+    {"id": "safiyanygaard", "name": "Safiya Nygaard", "emoji": "🎬", "rarity": "rare", "handle": "SafiyaNygaard",
+     "aliases": [], "hint": "Bad makeup science and experiments"},
+    {"id": "simplynailogical", "name": "Simply Nailogical", "emoji": "🎬", "rarity": "common", "handle": "SimplyNailogical",
+     "aliases": [], "hint": "Holo, and nail art chaos"},
+    {"id": "goodmythicalmorning", "name": "Good Mythical Morning", "emoji": "🎬", "rarity": "epic", "handle": "GoodMythicalMorning",
+     "aliases": [], "hint": "Rhett and Link, daily morning show"},
+    {"id": "caseyneistat", "name": "Casey Neistat", "emoji": "🎬", "rarity": "epic", "handle": "CaseyNeistat",
+     "aliases": [], "hint": "Boogie board, NYC, storytelling"},
+    {"id": "tomscott", "name": "Tom Scott", "emoji": "🎬", "rarity": "epic", "handle": "TomScottGo",
+     "aliases": [], "hint": "Things you might not know, and a red shirt"},
+    {"id": "vsauce", "name": "Vsauce", "emoji": "🎬", "rarity": "legendary", "handle": "Vsauce",
+     "aliases": [], "hint": "Hey, Vsauce, Michael here"},
+    {"id": "veritasium", "name": "Veritasium", "emoji": "🎬", "rarity": "epic", "handle": "veritasium",
+     "aliases": [], "hint": "Science with a twisty payoff"},
+    {"id": "kurzgesagt", "name": "Kurzgesagt", "emoji": "🎬", "rarity": "epic", "handle": "kurzgesagt",
+     "aliases": [], "hint": "Birds explaining the universe"},
+    {"id": "smartereveryday", "name": "SmarterEveryDay", "emoji": "🎬", "rarity": "rare", "handle": "smartereveryday",
+     "aliases": [], "hint": "Slow-motion science, Southern drawl"},
+    {"id": "numberphile", "name": "Numberphile", "emoji": "🎬", "rarity": "rare", "handle": "numberphile",
+     "aliases": [], "hint": "Brown paper, big numbers"},
+    {"id": "computerphile", "name": "Computerphile", "emoji": "🎬", "rarity": "rare", "handle": "Computerphile",
+     "aliases": [], "hint": "CS concepts on a whiteboard"},
+    {"id": "stevemould", "name": "Steve Mould", "emoji": "🎬", "rarity": "rare", "handle": "SteveMould",
+     "aliases": [], "hint": "Physics toys and curiosity"},
+    {"id": "mattparker", "name": "Matt Parker", "emoji": "🎬", "rarity": "rare", "handle": "standupmaths",
+     "aliases": [], "hint": "Stand-up maths, Pi Day records"},
+    {"id": "kylehill", "name": "Kyle Hill", "emoji": "🎬", "rarity": "rare", "handle": "KyleHill",
+     "aliases": [], "hint": "Half as interesting science"},
+    {"id": "electroboom", "name": "ElectroBOOM", "emoji": "🎬", "rarity": "rare", "handle": "ElectroBOOM",
+     "aliases": [], "hint": "Electricity, and pain"},
+    {"id": "minutephysics", "name": "MinutePhysics", "emoji": "🎬", "rarity": "common", "handle": "minutephysics",
+     "aliases": [], "hint": "Fast whiteboard physics"},
+    {"id": "linustechtips", "name": "Linus Tech Tips", "emoji": "🎬", "rarity": "legendary", "handle": "LinusTechTips",
+     "aliases": [], "hint": "Drop test, and many cables"},
+    {"id": "jayztwocents", "name": "JayzTwoCents", "emoji": "🎬", "rarity": "rare", "handle": "JayzTwoCents",
+     "aliases": [], "hint": "PC building and water cooling"},
+    {"id": "gamersnexus", "name": "Gamers Nexus", "emoji": "🎬", "rarity": "rare", "handle": "GamersNexus",
+     "aliases": [], "hint": "Thermals and charts, very thorough"},
+    {"id": "paulshardware", "name": "Paul's Hardware", "emoji": "🎬", "rarity": "common", "handle": "paulshardware",
+     "aliases": [], "hint": "Build guides and news"},
+    {"id": "austinevans", "name": "Austin Evans", "emoji": "🎬", "rarity": "rare", "handle": "austinevans",
+     "aliases": [], "hint": "Consumer tech, lots of phones"},
+    {"id": "dave2d", "name": "Dave2D", "emoji": "🎬", "rarity": "rare", "handle": "Dave2D",
+     "aliases": [], "hint": "Laptop reviews, calm voice"},
+    {"id": "ijustine", "name": "iJustine", "emoji": "🎬", "rarity": "common", "handle": "iJustine",
+     "aliases": [], "hint": "Apple everything, high energy"},
+    {"id": "unboxtherapy", "name": "Unbox Therapy", "emoji": "🎬", "rarity": "rare", "handle": "unboxtherapy",
+     "aliases": [], "hint": "Gadgets and the bend test"},
+    {"id": "jerryrigeverything", "name": "JerryRigEverything", "emoji": "🎬", "rarity": "rare", "handle": "JerryRigEverything",
+     "aliases": [], "hint": "Scratches, burns and bends phones"},
+    {"id": "snazzylabs", "name": "Snazzy Labs", "emoji": "🎬", "rarity": "common", "handle": "SnazzyLabs",
+     "aliases": [], "hint": "Macs, and hacking them"},
+    {"id": "fireship", "name": "Fireship", "emoji": "🎬", "rarity": "epic", "handle": "Fireship",
+     "aliases": [], "hint": "100 seconds of anything, very fast"},
+    {"id": "theprimeagen", "name": "ThePrimeagen", "emoji": "🎬", "rarity": "rare", "handle": "ThePrimeagen",
+     "aliases": [], "hint": "Vim, Rust and strong opinions"},
+    {"id": "michaelreeves", "name": "Michael Reeves", "emoji": "🎬", "rarity": "epic", "handle": "MichaelReeves",
+     "aliases": [], "hint": "Robots that should not exist"},
+    {"id": "williamosman", "name": "William Osman", "emoji": "🎬", "rarity": "rare", "handle": "WilliamOsman",
+     "aliases": [], "hint": "Questionable engineering, lasers"},
+    {"id": "allenpan", "name": "Allen Pan", "emoji": "🎬", "rarity": "rare", "handle": "AllenPan",
+     "aliases": [], "hint": "Sufficiently advanced, dinosaurs"},
+    {"id": "colinfurze", "name": "Colin Furze", "emoji": "🎬", "rarity": "epic", "handle": "colinfurze",
+     "aliases": [], "hint": "Shed builds, flamethrowers, no safety"},
+    {"id": "thehacksmith", "name": "the Hacksmith", "emoji": "🎬", "rarity": "rare", "handle": "thehacksmith",
+     "aliases": [], "hint": "Real-life superhero gadgets"},
+    {"id": "stuffmadehere", "name": "Stuff Made Here", "emoji": "🎬", "rarity": "epic", "handle": "StuffMadeHere",
+     "aliases": [], "hint": "Engineering that solves nothing"},
+    {"id": "petersripol", "name": "Peter Sripol", "emoji": "🎬", "rarity": "rare", "handle": "PeterSripol",
+     "aliases": [], "hint": "Homebuilt aircraft, near-disasters"},
+    {"id": "simonegiertz", "name": "Simone Giertz", "emoji": "🎬", "rarity": "rare", "handle": "SimoneGiertz",
+     "aliases": [], "hint": "Queen of useless robots"},
+    {"id": "laurakampf", "name": "Laura Kampf", "emoji": "🎬", "rarity": "common", "handle": "LauraKampf",
+     "aliases": [], "hint": "Woodworking and street finds"},
+    {"id": "ididathing", "name": "I did a thing", "emoji": "🎬", "rarity": "rare", "handle": "Ididathing",
+     "aliases": [], "hint": "Absurd builds, Australian accent"},
+    {"id": "howridiculous", "name": "How Ridiculous", "emoji": "🎬", "rarity": "common", "handle": "HowRidiculous",
+     "aliases": [], "hint": "Dropping things from very high"},
+    {"id": "flitetest", "name": "Flite Test", "emoji": "🎬", "rarity": "common", "handle": "FliteTest",
+     "aliases": [], "hint": "Foam board planes everywhere"},
+    {"id": "nerdforge", "name": "Nerdforge", "emoji": "🎬", "rarity": "rare", "handle": "Nerdforge",
+     "aliases": [], "hint": "Crafts, dioramas and armour"},
+    {"id": "aphmau", "name": "Aphmau", "emoji": "🎬", "rarity": "common", "handle": "Aphmau",
+     "aliases": [], "hint": "Minecraft roleplay, cats"},
+    {"id": "ssundee", "name": "SSundee", "emoji": "🎬", "rarity": "common", "handle": "SSundee",
+     "aliases": [], "hint": "Modded Minecraft with friends"},
 ]
 YT_BY_ID = {y["id"]: y for y in YOUTUBERS}
 
@@ -3658,8 +3826,14 @@ YT_CURRENT: dict = {"id": "", "channel_id": 0, "spawned_at": 0.0}
 
 
 def _yt_image(yt: dict) -> str:
-    """Real YouTube channel avatar, proxied through unavatar."""
-    return f"https://unavatar.io/youtube/@{yt['handle']}"
+    """Real YouTube avatar where the handle was verified, else a generated one.
+
+    unavatar rate-limits hard (429s under load), so an unverified handle would
+    risk a broken image in the embed. DiceBear always resolves.
+    """
+    if yt.get("verified_handle") and yt.get("handle"):
+        return f"https://unavatar.io/youtube/@{yt['handle']}"
+    return f"https://api.dicebear.com/9.x/bottts/png?size=512&seed={yt['id']}"
 
 
 def _current_yt() -> Optional[dict]:
@@ -3697,6 +3871,8 @@ def _yt_embed(yt: dict, first_letter: bool = True) -> discord.Embed:
         f"**Hint:** {yt['hint']}",
         f"**Rarity:** {yt['rarity']}",
     ]
+    if yt.get("subs"):
+        parts.append(f"**Subscribers:** {yt['subs']:,}")
     if first_letter:
         parts.append(f"**First letter:** `{yt['name'][0].upper()}`")
     parts.append("")
@@ -3784,25 +3960,26 @@ async def yt_guess(ctx: commands.Context, *, text: str = "") -> None:
         ))
         return
 
-    mine = COLLECTIONS.setdefault(str(ctx.author.id), {})
-    if yt["id"] in mine:
-        await ctx.send(embed=info(
-            f"You already collected {yt['emoji']} **{yt['name']}**. "
-            f"Another one is coming.", "Already yours"
-        ))
-        return
-
-    mine[yt["id"]] = int(time.time())
+    had = _owned_count(ctx.author.id, yt["id"])
+    _give_yt(ctx.author.id, yt["id"], 1)
     save_data()
 
+    mine = COLLECTIONS.get(str(ctx.author.id), {})
     counts = _rarity_counts(mine.keys())
-    embed = ok(
-        f"🎉 **{yt['name']}** collected!\n\n"
-        f"**Rarity:** {yt['rarity']}\n"
-        f"**Your collection:** {len(mine)}/{len(YOUTUBERS)}\n"
-        f"**Breakdown:** {_rarity_line(counts)}",
-        "✅ Correct!",
-    )
+    if had:
+        embed = fun(
+            f"🔁 **{yt['name']}** again — you now have **×{had + 1}**.\n\n"
+            f"That's a duplicate: trade it with `{PREFIX}yttrade @user {yt['name']} for <theirs>`.",
+            "✅ Duplicate collected",
+        )
+    else:
+        embed = ok(
+            f"🎉 **{yt['name']}** collected!\n\n"
+            f"**Rarity:** {yt['rarity']}\n"
+            f"**Your collection:** {len(mine)}/{len(YOUTUBERS)}\n"
+            f"**Breakdown:** {_rarity_line(counts)}",
+            "✅ Correct!",
+        )
     embed.set_thumbnail(url=_yt_image(yt))
     await ctx.send(embed=embed)
 
@@ -3823,7 +4000,14 @@ async def yt_collection(ctx: commands.Context, member: Optional[discord.Member] 
     order = {r: i for i, r in enumerate(RARITY_ORDER)}
     owned = [YT_BY_ID[i] for i in mine if i in YT_BY_ID]
     owned.sort(key=lambda y: (order.get(y["rarity"], 9), y["name"]))
-    lines = [f"{y['emoji']} **{y['name']}** · {y['rarity']}" for y in owned]
+    def _cnt(yid: str) -> int:
+        v = mine.get(yid, 1)
+        return int(v) if isinstance(v, int) else 1
+    lines = [
+        f"{y['emoji']} **{y['name']}** · {y['rarity']}"
+        + (f" · **×{_cnt(y['id'])}**" if _cnt(y["id"]) > 1 else "")
+        for y in owned
+    ]
     counts = _rarity_counts(mine.keys())
 
     embed = fun("\n".join(lines)[:3900], f"🎒 {target.display_name}'s collection")
@@ -3846,7 +4030,8 @@ async def yt_leaderboard(ctx: commands.Context) -> None:
         counts = _rarity_counts(owned.keys())
         for r in RARITY_ORDER:
             server_totals[r] += counts[r]
-        rows.append((uid, len(owned), counts))
+        copies = sum(int(c) if isinstance(c, int) else 1 for c in owned.values())
+        rows.append((uid, len(owned), counts, copies))
 
     if not rows:
         await ctx.send(embed=info(
@@ -3860,9 +4045,10 @@ async def yt_leaderboard(ctx: commands.Context) -> None:
     rows.sort(key=lambda r: (-r[1], -r[2]["legendary"], -r[2]["epic"], -r[2]["rare"]))
     medals = {1: "🥇", 2: "🥈", 3: "🥉"}
     lines = []
-    for i, (uid, total, counts) in enumerate(rows[:10], 1):
+    for i, (uid, total, counts, copies) in enumerate(rows[:10], 1):
         tag = medals.get(i, f"`{i}.`")
-        lines.append(f"{tag} <@{uid}> — **{total}** · `{_rarity_line(counts)}`")
+        extra = f" · {copies} copies" if copies > total else ""
+        lines.append(f"{tag} <@{uid}> — **{total}** · `{_rarity_line(counts)}`{extra}")
 
     embed = fun("\n".join(lines)[:3900], "🏆 Collection leaderboard")
     embed.add_field(
@@ -3877,6 +4063,236 @@ async def yt_leaderboard(ctx: commands.Context) -> None:
         text=f"{len(rows)} collector(s) · {unique}/{len(YOUTUBERS)} YouTubers claimed · "
              f"drops every {YT_EVERY_MESSAGES} messages · L E R C = legendary/epic/rare/common"
     )
+    await ctx.send(embed=embed)
+
+
+# ---------------------------------------------------------------------------
+# Duplicate trading
+# ---------------------------------------------------------------------------
+YT_TRADE_TTL = 600          # offers expire after 10 minutes
+YT_TRADES: dict[str, dict] = {}
+
+
+def _owned_count(user_id: int, yid: str) -> int:
+    val = COLLECTIONS.get(str(user_id), {}).get(yid, 0)
+    return int(val) if isinstance(val, int) else 1
+
+
+def _give_yt(user_id: int, yid: str, n: int = 1) -> None:
+    col = COLLECTIONS.setdefault(str(user_id), {})
+    cur = col.get(yid, 0)
+    col[yid] = (int(cur) if isinstance(cur, int) else 1) + n
+
+
+def _take_yt(user_id: int, yid: str, n: int = 1) -> bool:
+    col = COLLECTIONS.get(str(user_id), {})
+    cur = col.get(yid, 0)
+    cur = int(cur) if isinstance(cur, int) else 1
+    if cur < n:
+        return False
+    left = cur - n
+    if left <= 0:
+        col.pop(yid, None)
+    else:
+        col[yid] = left
+    if not col:
+        COLLECTIONS.pop(str(user_id), None)
+    return True
+
+
+def _resolve_yt(text: str) -> Optional[dict]:
+    """Find a YouTuber by name, id or alias."""
+    q = _core(text)
+    if not q:
+        return None
+    for y in YOUTUBERS:
+        if q == _core(y["name"]) or q == _core(y["id"]):
+            return y
+    for y in YOUTUBERS:
+        if q in {_core(a) for a in y.get("aliases", [])}:
+            return y
+    return None
+
+
+def _live_trades() -> list[tuple[str, dict]]:
+    now = time.time()
+    for tid in [t for t, d in YT_TRADES.items() if now > d.get("expires", 0)]:
+        YT_TRADES.pop(tid, None)
+    return list(YT_TRADES.items())
+
+
+def _trade_for(user_id: int) -> Optional[tuple[str, dict]]:
+    for tid, d in _live_trades():
+        if user_id in (d["from"], d["to"]):
+            return tid, d
+    return None
+
+
+def _trade_embed(trade: dict, title: str = "🔄 YouTuber trade offer") -> discord.Embed:
+    give = YT_BY_ID.get(trade["give"])
+    want = YT_BY_ID.get(trade["want"])
+    g_name = give["name"] if give else trade["give"]
+    w_name = want["name"] if want else trade["want"]
+    embed = discord.Embed(
+        title=title,
+        description=(
+            f"<@{trade['from']}> gives **{g_name}**\n"
+            f"<@{trade['to']}> gives **{w_name}**\n\n"
+            f"<@{trade['to']}> — accept with `{PREFIX}yttradeaccept`\n"
+            f"Either side can cancel with `{PREFIX}yttradecancel`."
+        ),
+        colour=COLOUR_FUN,
+    )
+    if want:
+        embed.set_thumbnail(url=_yt_image(want))
+    embed.set_footer(text=f"Expires in 10 minutes · duplicates only")
+    return embed
+
+
+@bot.command(name="yttrade")
+async def yt_trade(ctx: commands.Context, member: discord.Member, *, offer: str = "") -> None:
+    """Trade a duplicate. Usage: !yttrade @user MrBeast for Tom Scott"""
+    if member.bot or member.id == ctx.author.id:
+        await ctx.send(embed=err("Pick another member."))
+        return
+
+    parts = re.split(r"\s+for\s+", offer.strip(), maxsplit=1, flags=re.I)
+    if len(parts) != 2:
+        await ctx.send(embed=err(
+            f"Usage: `{PREFIX}yttrade @user <you give> for <you get>`\n"
+            f"Example: `{PREFIX}yttrade @bob MrBeast for Tom Scott`"
+        ))
+        return
+
+    give = _resolve_yt(parts[0])
+    want = _resolve_yt(parts[1])
+    if give is None or want is None:
+        bad = parts[0] if give is None else parts[1]
+        await ctx.send(embed=err(f"I don't know a YouTuber called `{bad.strip()}`."))
+        return
+    if give["id"] == want["id"]:
+        await ctx.send(embed=err("That's the same YouTuber."))
+        return
+
+    if _owned_count(ctx.author.id, give["id"]) < 1:
+        await ctx.send(embed=err(f"You don't own **{give['name']}**."))
+        return
+    if _owned_count(member.id, want["id"]) < 1:
+        await ctx.send(embed=err(f"{member.mention} doesn't own **{want['name']}**."))
+        return
+
+    if _trade_for(ctx.author.id):
+        await ctx.send(embed=err(f"You already have a trade open. Use `{PREFIX}yttradecancel`."))
+        return
+    if _trade_for(member.id):
+        await ctx.send(embed=err(f"{member.mention} already has a trade open."))
+        return
+
+    give_count = _owned_count(ctx.author.id, give["id"])
+    if give_count < 2:
+        await ctx.send(embed=info(
+            f"Heads up: **{give['name']}** is your only copy, so you'll lose it "
+            f"from your collection if this goes through.",
+            "⚠️ Not a duplicate",
+        ))
+
+    tid = secrets.token_hex(3)
+    YT_TRADES[tid] = {
+        "from": ctx.author.id,
+        "to": member.id,
+        "give": give["id"],
+        "want": want["id"],
+        "created": time.time(),
+        "expires": time.time() + YT_TRADE_TTL,
+    }
+    save_data()
+    await ctx.send(content=member.mention, embed=_trade_embed(YT_TRADES[tid]))
+
+
+@bot.command(name="yttradeaccept")
+async def yt_trade_accept(ctx: commands.Context) -> None:
+    """Accept a trade offer addressed to you."""
+    found = _trade_for(ctx.author.id)
+    if found is None:
+        await ctx.send(embed=err("You have no open trade."))
+        return
+    tid, trade = found
+    if trade["to"] != ctx.author.id:
+        await ctx.send(embed=err("That offer isn't addressed to you — only the receiver can accept."))
+        return
+
+    give = YT_BY_ID.get(trade["give"])
+    want = YT_BY_ID.get(trade["want"])
+    if give is None or want is None:
+        YT_TRADES.pop(tid, None)
+        save_data()
+        await ctx.send(embed=err("That trade referenced an unknown YouTuber, so it's cancelled."))
+        return
+
+    if _owned_count(trade["to"], want["id"]) < 1:
+        YT_TRADES.pop(tid, None)
+        save_data()
+        await ctx.send(embed=err(f"You no longer own **{want['name']}**."))
+        return
+    if _owned_count(trade["from"], give["id"]) < 1:
+        YT_TRADES.pop(tid, None)
+        save_data()
+        await ctx.send(embed=err(f"<@{trade['from']}> no longer owns **{give['name']}**."))
+        return
+
+    _take_yt(trade["from"], give["id"])
+    _give_yt(trade["to"], give["id"])
+    _take_yt(trade["to"], want["id"])
+    _give_yt(trade["from"], want["id"])
+
+    YT_TRADES.pop(tid, None)
+    save_data()
+
+    embed = ok(
+        f"<@{trade['from']}> gave **{give['name']}**\n"
+        f"{ctx.author.mention} gave **{want['name']}**",
+        "✅ Trade complete",
+    )
+    if give:
+        embed.set_thumbnail(url=_yt_image(give))
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="yttradecancel")
+async def yt_trade_cancel(ctx: commands.Context) -> None:
+    """Cancel or decline your open trade."""
+    found = _trade_for(ctx.author.id)
+    if found is None:
+        await ctx.send(embed=err("You have no open trade."))
+        return
+    tid, trade = found
+    YT_TRADES.pop(tid, None)
+    save_data()
+    role = "cancelled" if trade["from"] == ctx.author.id else "declined"
+    other = trade["to"] if trade["from"] == ctx.author.id else trade["from"]
+    await ctx.send(embed=info(
+        f"{ctx.author.mention} {role} the trade. <@{other}> is free again.", "❌ Closed"
+    ))
+
+
+@bot.command(name="dupes", aliases=["mytrades"])
+async def yt_dupes(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """List the YouTubers you own more than one of."""
+    target = member or ctx.author
+    col = COLLECTIONS.get(str(target.id), {})
+    dupes = [(y, int(c) if isinstance(c, int) else 1) for y, c in col.items()
+             if (int(c) if isinstance(c, int) else 1) > 1 and y in YT_BY_ID]
+    if not dupes:
+        await ctx.send(embed=info(
+            f"{target.mention} has no duplicates yet.\n"
+            f"Get one by guessing a YouTuber you already own again.", "🔁 No duplicates"
+        ))
+        return
+    dupes.sort(key=lambda x: -x[1])
+    lines = [f"{YT_BY_ID[y]['emoji']} **{YT_BY_ID[y]['name']}** ×{c} · {YT_BY_ID[y]['rarity']}"
+             for y, c in dupes]
+    embed = fun("\n".join(lines)[:3900], f"🔁 {target.display_name}'s duplicates")
+    embed.set_footer(text=f"{PREFIX}yttrade @user <yours> for <theirs>")
     await ctx.send(embed=embed)
 
 
@@ -3993,6 +4409,7 @@ def _serialize() -> dict:
         "stock": STOCK,
         "settings": SETTINGS,
         "collections": {uid: c for uid, c in COLLECTIONS.items() if c},
+        "yt_trades": {tid: t for tid, t in YT_TRADES.items() if time.time() < t.get("expires", 0)},
         "yt_current": YT_CURRENT,
         "msg_counts": MSG_COUNTS,
         "auction": AUCTION,
@@ -4134,9 +4551,29 @@ async def restore_state() -> None:
 
     for uid, cols in (raw.get("collections") or {}).items():
         try:
-            clean = {str(y): int(ts) for y, ts in cols.items() if y in YT_BY_ID}
+            clean = {}
+            for y, v in cols.items():
+                if y not in YT_BY_ID:
+                    continue
+                v = int(v)
+                # older saves stored a unix timestamp; that means "owns one"
+                clean[str(y)] = 1 if v > 10_000_000 else max(1, v)
             if clean:
                 COLLECTIONS[str(uid)] = clean
+        except Exception:
+            continue
+
+    for tid, t in (raw.get("yt_trades") or {}).items():
+        try:
+            if time.time() > float(t.get("expires", 0)):
+                continue
+            if t["give"] not in YT_BY_ID or t["want"] not in YT_BY_ID:
+                continue
+            YT_TRADES[str(tid)] = {
+                "from": int(t["from"]), "to": int(t["to"]),
+                "give": t["give"], "want": t["want"],
+                "created": float(t.get("created", 0)), "expires": float(t["expires"]),
+            }
         except Exception:
             continue
 
@@ -4537,7 +4974,8 @@ CATEGORIES: dict[str, list[str]] = {
         "eco profile", "eco stats", "eco daily", "eco work", "eco balance",
         "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
     ],
-    "🎮 YouTuber game": ["yt", "guess", "collection", "ytlb", "ytspawn", "ytset"],
+    "🎮 YouTuber game": ["yt", "guess", "collection", "dupes", "ytlb",
+                          "yttrade", "yttradeaccept", "yttradecancel", "ytspawn", "ytset"],
     "👋 Welcome": ["autorole"],
     "🛒 Market": [
         "wallet", "shop", "inv",

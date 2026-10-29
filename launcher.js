@@ -112,6 +112,36 @@ function git(args) {
   return { ok: res.status === 0, out: `${res.stdout || ''}${res.stderr || ''}`.trim() };
 }
 
+// One dated copy per day, so git history becomes a 14-day backup set
+// instead of only the latest state.
+const BACKUP_DIR = 'backups';
+const BACKUP_KEEP = 14;
+
+function writeDailySnapshot() {
+  try {
+    if (!fs.existsSync('botdata.json')) return '';
+    const today = new Date().toISOString().slice(0, 10);
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const target = `${BACKUP_DIR}/botdata-${today}.json`;
+    if (!fs.existsSync(target)) {
+      fs.copyFileSync('botdata.json', target);
+      console.log(`[${new Date().toISOString()}] daily snapshot written: ${target}`);
+    }
+    const snapshots = fs.readdirSync(BACKUP_DIR)
+      .filter((f) => /^botdata-\d{4}-\d{2}-\d{2}\.json$/.test(f))
+      .sort();
+    const excess = snapshots.length - BACKUP_KEEP;
+    for (const f of snapshots.slice(0, Math.max(0, excess))) {
+      fs.unlinkSync(`${BACKUP_DIR}/${f}`);
+      console.log(`[${new Date().toISOString()}] pruned old snapshot: ${f}`);
+    }
+    return target;
+  } catch (e) {
+    console.log(`snapshot failed: ${e.message}`);
+    return '';
+  }
+}
+
 async function commitData() {
   if (!(await checkVisibility())) {
     if (!committedOnce) {
@@ -127,7 +157,8 @@ async function commitData() {
 
   git(['config', 'user.name', 'synergy-bot']);
   git(['config', 'user.email', 'actions@users.noreply.github.com']);
-  git(['add', '-A', 'botdata.json', 'transcripts']);
+  writeDailySnapshot();
+  git(['add', '-A', 'botdata.json', 'transcripts', BACKUP_DIR]);
 
   const staged = git(['diff', '--cached', '--quiet']);
   if (staged.ok) {

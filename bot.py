@@ -3610,213 +3610,213 @@ RARITY_ORDER = ["legendary", "epic", "rare", "common"]
 
 YOUTUBERS: list[dict] = [
     {"id": "mrbeast", "name": "MrBeast", "emoji": "🦁", "rarity": "legendary", "handle": "MrBeast", "verified_handle": True,
-     "aliases": ["mr beast", "jimmy donaldson"], "hint": "Massive challenges, bigger giveaways"},
+     "aliases": ["mr beast", "jimmy donaldson"], "hint": "Massive challenges, bigger giveaways", "verified_handle": True, "image": "https://yt3.googleusercontent.com/nxYrc_1_2f77DoBadyxMTmv7ZpRZapHR5jbuYe7PlPd5cIRJxtNNEYyOC0ZsxaDyJJzXrnJiuDE"},
     {"id": "pewdiepie", "name": "PewDiePie", "emoji": "👑", "rarity": "legendary", "handle": "PewDiePie", "verified_handle": True,
-     "aliases": ["pewds", "felix"], "hint": "The most-subscribed individual for years"},
+     "aliases": ["pewds", "felix"], "hint": "The most-subscribed individual for years", "verified_handle": True, "image": "https://yt3.googleusercontent.com/vik8mAiwHQbXiFyKfZ3__p55_VBdGvwxPpuPJBBwdbF0PjJxikXhrP-C3nLQAMAxGNd_-xQCIg"},
     {"id": "markrober", "name": "Mark Rober", "emoji": "🔬", "rarity": "epic", "handle": "MarkRober", "verified_handle": True,
-     "aliases": ["mark rober", "rober"], "hint": "Ex-NASA engineer, builds ridiculous science"},
+     "aliases": ["mark rober", "rober"], "hint": "Ex-NASA engineer, builds ridiculous science", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_ksXY2REjZ6gYKSgnWT5jC_zT9mX900vyFtVinR8KbHww"},
     {"id": "ksi", "name": "KSI", "emoji": "🥊", "rarity": "epic", "handle": "KSI", "verified_handle": True,
-     "aliases": ["jj olatunji"], "hint": "Sidemen co-founder, boxing matches, music"},
+     "aliases": ["jj olatunji"], "hint": "Sidemen co-founder, boxing matches, music", "verified_handle": True, "image": "https://yt3.googleusercontent.com/2f8wOz76TImPcmiuUYSgJQbQnjEKXlD01_kw284BOI_DrQS4tYS6Q97DMW-yffRT-pVYIs6a"},
     {"id": "loganpaul", "name": "Logan Paul", "emoji": "🍾", "rarity": "rare", "handle": "LoganPaul", "verified_handle": True,
-     "aliases": ["logan"], "hint": "WWE wrestler turned podcast host"},
+     "aliases": ["logan"], "hint": "WWE wrestler turned podcast host", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_ltcpgwsF77fVG5xlQpHtPczqs4j60VkUzbtBrDBP_8QFY"},
     {"id": "dudeperfect", "name": "Dude Perfect", "emoji": "🏀", "rarity": "epic", "handle": "DudePerfect", "verified_handle": True,
-     "aliases": ["dudes"], "hint": "Five friends, impossible trick shots"},
+     "aliases": ["dudes"], "hint": "Five friends, impossible trick shots", "verified_handle": True, "image": "https://yt3.googleusercontent.com/nZRsCgyfOVFhBzY-YFV8AhdMcYAybNZ8uttjcsrUGOnGRSVF5yKqRh6XHIs_o03TcbixvlOZ"},
     {"id": "dream", "name": "Dream", "emoji": "💚", "rarity": "epic", "handle": "dream", "verified_handle": True,
-     "aliases": [], "hint": "Minecraft manhunt, green smiley mask"},
+     "aliases": [], "hint": "Minecraft manhunt, green smiley mask", "verified_handle": True, "image": "https://yt3.googleusercontent.com/In7JtEzLm2klae8nEa04D9OEYn_Sz8DUCEEs3lon3db0d2B7Ng4-jNRWv3C5hetujaqAj9mwBg"},
     {"id": "technoblade", "name": "Technoblade", "emoji": "🐷", "rarity": "legendary", "handle": "Technothepig", "verified_handle": True,
-     "aliases": ["techno", "technoblade"], "hint": "The Blade never dies"},
+     "aliases": ["techno", "technoblade"], "hint": "The Blade never dies", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_lrcAGP3htFIscbmyoevZ_YtEXgpuW1YvtnCs5PY4CK0NA"},
     {"id": "jacksepticeye", "name": "Jacksepticeye", "emoji": "🎙", "rarity": "rare", "handle": "jacksepticeye", "verified_handle": True,
-     "aliases": ["jack septic eye", "sean"], "hint": "Irish, very loud, PMA"},
+     "aliases": ["jack septic eye", "sean"], "hint": "Irish, very loud, PMA", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_m7K306sLhJfQqGAMnuHdEBTwdqBA4gVTGa_FtEmarXd34"},
     {"id": "moistcr1tikal", "name": "MoistCr1TiKaL", "emoji": "🥤", "rarity": "rare", "handle": "penguinz0", "verified_handle": True,
-     "aliases": ["cr1tikal", "critical", "penguinz0", "moist"], "hint": "Deadpan white t-shirt guy"},
+     "aliases": ["cr1tikal", "critical", "penguinz0", "moist"], "hint": "Deadpan white t-shirt guy", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kOWn68FmChjExAEGw0vjLBpiP907ccNT5wASHcBjZeEuA"},
     {"id": "vanoss", "name": "VanossGaming", "emoji": "🦉", "rarity": "rare", "handle": "VanossGaming", "verified_handle": True,
-     "aliases": ["vanoss"], "hint": "Owl mask, GTA and Gmod chaos"},
+     "aliases": ["vanoss"], "hint": "Owl mask, GTA and Gmod chaos", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mrzXEes8j0Li9x1M2wO0dif1mW10t_lmgrDcxllRfaJNE"},
     {"id": "dantdm", "name": "DanTDM", "emoji": "💎", "rarity": "rare", "handle": "DanTDM", "verified_handle": True,
-     "aliases": ["dan tdm", "the diamond minecart"], "hint": "Blue hair, Minecraft royalty"},
+     "aliases": ["dan tdm", "the diamond minecart"], "hint": "Blue hair, Minecraft royalty", "verified_handle": True, "image": "https://yt3.googleusercontent.com/1IPv4TRdl3RaT1HEsqdvjzqA0OvBHbVxZFt2U5QZHKDgbEGosdazeBqyJH9ZU5rhs9kfC8dGXRc"},
     {"id": "sssniperwolf", "name": "SSSniperWolf", "emoji": "🐺", "rarity": "rare", "handle": "SSSniperWolf", "verified_handle": True,
-     "aliases": ["sniperwolf", "lia"], "hint": "Reaction videos, wolf in the name"},
+     "aliases": ["sniperwolf", "lia"], "hint": "Reaction videos, wolf in the name", "verified_handle": True, "image": "https://yt3.googleusercontent.com/zmwPW6LtafadphG0c5qdxTY11Tx6hGwMCiBVQGrsDQRjf2-5oGlC_hPawSrmbNk5mo5Xpx9rag"},
     {"id": "ryantrahan", "name": "Ryan Trahan", "emoji": "🍞", "rarity": "epic", "handle": "RyanTrahan", "verified_handle": True,
-     "aliases": ["ryan"], "hint": "Travelled across America on one penny a day"},
+     "aliases": ["ryan"], "hint": "Travelled across America on one penny a day", "verified_handle": True, "image": "https://yt3.googleusercontent.com/fiJrCXLTjjY531uelhbpUD21Cb0iMb6vF21M6-H7ZhjMZPe2cAkIeB9yWUHtENkFhq1F3oVbgg"},
     {"id": "airrack", "name": "Airrack", "emoji": "🎈", "rarity": "rare", "handle": "airrack", "verified_handle": True,
-     "aliases": [], "hint": "Rented an entire island, absurd stunts"},
+     "aliases": [], "hint": "Rented an entire island, absurd stunts", "verified_handle": True, "image": "https://yt3.googleusercontent.com/B6mcXnYXqha3Aaofo5J_jqP6XBUEW9GvMQMNGvwFN93UvNwF7kdlKNnxEQ5HBmYHpRq-SBogxg"},
     {"id": "mkbhd", "name": "Marques Brownlee", "emoji": "📱", "rarity": "epic", "handle": "mkbhd", "verified_handle": True,
-     "aliases": ["mkbhd", "marques"], "hint": "The phone review guy, crisp studio"},
+     "aliases": ["mkbhd", "marques"], "hint": "The phone review guy, crisp studio", "verified_handle": True, "image": "https://yt3.googleusercontent.com/qu4TmIaYUlS41-dJ9gZ7DUR3nilvmB5_11i6OKSdvNnBNiyOusZP1bMN6ICnuxtjFBb6ioKgRQ"},
     {"id": "unspeakable", "name": "Unspeakable", "emoji": "🧢", "rarity": "common", "handle": "Unspeakable", "verified_handle": True,
-     "aliases": [], "hint": "Blue cap, insane challenges"},
+     "aliases": [], "hint": "Blue cap, insane challenges", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_l9fWjJ_HbQgKpYTpi5Y21Cwow2-m0OBsxwzXyf6CE28ro"},
     {"id": "lazarbeam", "name": "LazarBeam", "emoji": "🦘", "rarity": "common", "handle": "LazarBeam", "verified_handle": True,
-     "aliases": ["lannan"], "hint": "Australian, Fortnite and bad ideas"},
+     "aliases": ["lannan"], "hint": "Australian, Fortnite and bad ideas", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kaAARWaab8Y9Jt3yWZb2IKs4qgJSHAye7qdbz2VfXacoE"},
     {"id": "sidemen", "name": "Sidemen", "emoji": "⚽", "rarity": "epic", "handle": "Sidemen", "verified_handle": True,
-     "aliases": ["the sidemen"], "hint": "Seven British lads, charity matches"},
+     "aliases": ["the sidemen"], "hint": "Seven British lads, charity matches", "verified_handle": True, "image": "https://yt3.googleusercontent.com/xVXPh2t4Z7pYetsrxf_paFtTQ7SOGHmx1WlRzZVTJ5S2cPAsUOtZRLisFFlnvQPnKAoIur0X"},
     {"id": "mrwhosetheboss", "name": "Mrwhosetheboss", "emoji": "🔌", "rarity": "rare", "handle": "Mrwhosetheboss", "verified_handle": True,
-     "aliases": ["arun"], "hint": "British tech reviews, very orange set"},
+     "aliases": ["arun"], "hint": "British tech reviews, very orange set", "verified_handle": True, "image": "https://yt3.googleusercontent.com/QFI5OsUuSRHV-YpwksnVqpqWC19gjU55smnxPzLVU5Y5ohqKIkxq21nV_VfBJhvanYeMBot21A"},
     {"id": "kryvora", "name": "Kryvora", "emoji": "🎬", "rarity": "legendary", "handle": "Kryvora", "subs": 351,
-     "aliases": [], "hint": "351 subscribers — and climbing"},
+     "aliases": [], "hint": "351 subscribers — and climbing", "verified_handle": True, "image": "https://yt3.googleusercontent.com/NtefgeaqSvXRWOClFFOKSWcDS1Epb3OL94ChlxRRNy7nepsDfykRaCnBVpksDAcSJsaOGRvp"},
     {"id": "ninja", "name": "Ninja", "emoji": "🎬", "rarity": "legendary", "handle": "Ninja",
-     "aliases": [], "hint": "The blue-haired Fortnite pro who blew up on Twitch"},
+     "aliases": [], "hint": "The blue-haired Fortnite pro who blew up on Twitch", "verified_handle": True, "image": "https://yt3.googleusercontent.com/U1fckzNGBn8FcM29b2TkMMzWPb_AZaFFme90rACZA_rux_aZczVzDMLpTkmu1GroycEcbcgM"},
     {"id": "pokimane", "name": "Pokimane", "emoji": "🎬", "rarity": "legendary", "handle": "pokimane",
-     "aliases": [], "hint": "One of Twitch's most-followed streamers"},
+     "aliases": [], "hint": "One of Twitch's most-followed streamers", "verified_handle": True, "image": "https://yt3.googleusercontent.com/zLnHIkM51I6geJNta534_0eFyjKkvMMKuQB_GJhmm7qmOS_J0Kx-fHgaSP0Q7tjSrHBg803wbpE"},
     {"id": "xqc", "name": "xQc", "emoji": "🎬", "rarity": "legendary", "handle": "xQc",
-     "aliases": [], "hint": "Overwatch pro turned chaotic variety streamer"},
+     "aliases": [], "hint": "Overwatch pro turned chaotic variety streamer", "verified_handle": True, "image": "https://yt3.googleusercontent.com/PMeukBwPjWGLxnGauK3n8e41PbKZtQPJ-LLUnlmnCBldo7h-Bi358zmDptx4PFmO-4N7o355Lg"},
     {"id": "ludwig", "name": "Ludwig", "emoji": "🎬", "rarity": "legendary", "handle": "Ludwig",
-     "aliases": [], "hint": "Chess boxing and Mogul Chessboxing"},
+     "aliases": [], "hint": "Chess boxing and Mogul Chessboxing", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nBvD2_i9JPqMIZoH-3Pct438PAEd1d4rLEd1LCCLEEmKc"},
     {"id": "valkyrae", "name": "Valkyrae", "emoji": "🎬", "rarity": "epic", "handle": "Valkyrae",
-     "aliases": [], "hint": "100 Thieves co-owner, Among Us queen"},
+     "aliases": [], "hint": "100 Thieves co-owner, Among Us queen", "verified_handle": True, "image": "https://yt3.googleusercontent.com/BEeAjAhce4iNmxLeyeEldK0vUwotb6lU4m0ZRjX-GvagXQpWlhlcY_c7RxtfHhwlcy-N8-ZTUg"},
     {"id": "sykkuno", "name": "Sykkuno", "emoji": "🎬", "rarity": "epic", "handle": "Sykkuno",
-     "aliases": [], "hint": "Soft-spoken, defies every streaming expectation"},
+     "aliases": [], "hint": "Soft-spoken, defies every streaming expectation", "verified_handle": True, "image": "https://yt3.googleusercontent.com/OG5cPGb5BWnM53McZo2oSeiiibA3FNyFVJKFSL6YfbRWjepWxRZBKq9g-ydBgcWIhndla7EC_w"},
     {"id": "disguisedtoast", "name": "Disguised Toast", "emoji": "🎬", "rarity": "epic", "handle": "DisguisedToast",
-     "aliases": [], "hint": "Card games, then everything else"},
+     "aliases": [], "hint": "Card games, then everything else", "verified_handle": True, "image": "https://yt3.googleusercontent.com/dFi9dtsGd8bcJtIsTMNnLNChfn-IlPlqdqiU9_ofPmUi2qrrP_0o1RGmpcxaCvf3lKv8KvywVg"},
     {"id": "timthetatman", "name": "TimTheTatman", "emoji": "🎬", "rarity": "epic", "handle": "TimTheTatman",
-     "aliases": [], "hint": "Big laugh, bigger Warzone plays"},
+     "aliases": [], "hint": "Big laugh, bigger Warzone plays", "verified_handle": True, "image": "https://yt3.googleusercontent.com/WQmLLfBXgZ5axWYZbRgBsSrpePHVP-70gwnU0IWKz1o-7VeAZ-O1fCqYlz9r296mU5ltqgKgGA"},
     {"id": "drdisrespect", "name": "Dr Disrespect", "emoji": "🎬", "rarity": "legendary", "handle": "DrDisrespect",
-     "aliases": [], "hint": "Two-time back-to-back champion"},
+     "aliases": [], "hint": "Two-time back-to-back champion", "verified_handle": True, "image": "https://yt3.googleusercontent.com/_0_SuenjzMocr2OTOHbGjEin5FcHOy-vRroLcEZtj0WfUMEQXVQqbtEuRaa-tIewyjbAkffR"},
     {"id": "hasanabi", "name": "HasanAbi", "emoji": "🎬", "rarity": "epic", "handle": "HasanAbi",
-     "aliases": [], "hint": "Politics and reaction streams, very loud"},
+     "aliases": [], "hint": "Politics and reaction streams, very loud", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_n5ebqncYr_RQi6dwWsZ_oZtI4M6MsC7d_jjCNYpp5Et68"},
     {"id": "sypherpk", "name": "SypherPK", "emoji": "🎬", "rarity": "rare", "handle": "SypherPK",
-     "aliases": [], "hint": "Fortnite tips with a calming voice"},
+     "aliases": [], "hint": "Fortnite tips with a calming voice", "verified_handle": True, "image": "https://yt3.googleusercontent.com/obTtPNyUpQf3BrbkchYmndABRVJR4FqVslO6ahW_T8tD3prxnswFFvmS6onB1MS62clf1hutz6o"},
     {"id": "nickmercs", "name": "NICKMERCS", "emoji": "🎬", "rarity": "rare", "handle": "NICKMERCS",
-     "aliases": [], "hint": "MNM gaming, Warzone drops"},
+     "aliases": [], "hint": "MNM gaming, Warzone drops", "verified_handle": True, "image": "https://yt3.googleusercontent.com/zDlHdBVWPQkUwFhs-sNHs00-DtFWZ523BfpJQ0evXftiIXr5lGS8l2-6DHBybuOB3hZSkqbEfg"},
     {"id": "courage", "name": "CouRage", "emoji": "🎬", "rarity": "rare", "handle": "couragejd",
-     "aliases": [], "hint": "High-energy casting turned streaming"},
+     "aliases": [], "hint": "High-energy casting turned streaming", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_moDsebZSiQzpsHf6nAHCtuiS6Q-hD-oIVVOzngVUwXPj0"},
     {"id": "drlupo", "name": "DrLupo", "emoji": "🎬", "rarity": "rare", "handle": "DrLupo",
-     "aliases": [], "hint": "Charity streams, calm aim"},
+     "aliases": [], "hint": "Charity streams, calm aim", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mrPwJojxS9F7m1kzaDreQPXcWWnGYm1ZZHPYjVh6mhFgo"},
     {"id": "summit1g", "name": "summit1g", "emoji": "🎬", "rarity": "rare", "handle": "summit1g",
-     "aliases": [], "hint": "Counter-Strike veteran, variety now"},
+     "aliases": [], "hint": "Counter-Strike veteran, variety now", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_l-fF6fxRLYK5btlh-Xfpj6eKhUHSxbSe_6-GljJO5rfYk"},
     {"id": "jerma985", "name": "Jerma985", "emoji": "🎬", "rarity": "epic", "handle": "Jerma985",
-     "aliases": [], "hint": "The one who is definitely a real person"},
+     "aliases": [], "hint": "The one who is definitely a real person", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kCqAmQlk_TDrs8-MvVmF3TtCpOV4ydXkS8aTzEEgDSiv8"},
     {"id": "northernlion", "name": "Northernlion", "emoji": "🎬", "rarity": "rare", "handle": "Northernlion",
-     "aliases": [], "hint": "Binding of Isaac forever"},
+     "aliases": [], "hint": "Binding of Isaac forever", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mZSSRynYDl-MtAWGJNtmT9jCjFc4MWUPo5_5gGaErnfA"},
     {"id": "tommyinnit", "name": "TommyInnit", "emoji": "🎬", "rarity": "epic", "handle": "TommyInnit",
-     "aliases": [], "hint": "Loud British Minecraft chaos"},
+     "aliases": [], "hint": "Loud British Minecraft chaos", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nKI4I6HlD1WXXXLig8UdltE92jpUSW6ng8P0cUUPUhKzw"},
     {"id": "wilbursoot", "name": "Wilbur Soot", "emoji": "🎬", "rarity": "epic", "handle": "WilburSoot",
-     "aliases": [], "hint": "Musician and Minecraft storyteller"},
+     "aliases": [], "hint": "Musician and Minecraft storyteller", "verified_handle": True, "image": "https://yt3.googleusercontent.com/vVSOylltdRg4-qzoUARVx8Y4Sl5HgS931RbDzWPbPpPLs2Q1ksYBZ6NlWEgEOayiBgHBwJwEWDU"},
     {"id": "quackity", "name": "Quackity", "emoji": "🎬", "rarity": "rare", "handle": "Quackity",
-     "aliases": [], "hint": "Spanish and English, endless projects"},
+     "aliases": [], "hint": "Spanish and English, endless projects", "verified_handle": True, "image": "https://yt3.googleusercontent.com/txw2-fUANYre7lGfJzMQf4mHnO6vgVavREPCQhAJu3mZaVt5qiBrVvQ8dRBAUt3xc6Rjk5pB"},
     {"id": "georgenotfound", "name": "GeorgeNotFound", "emoji": "🎬", "rarity": "rare", "handle": "GeorgeNotFound",
-     "aliases": [], "hint": "Dream's colour-blind friend"},
+     "aliases": [], "hint": "Dream's colour-blind friend", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_m1rQBE9mRK7nnv532ja0Djt3DazkS7PwoHlEuvexK81Qs"},
     {"id": "sapnap", "name": "Sapnap", "emoji": "🎬", "rarity": "rare", "handle": "Sapnap",
-     "aliases": [], "hint": "Minecraft PvP, green and orange"},
+     "aliases": [], "hint": "Minecraft PvP, green and orange", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kgPyP9SDWY6nqraEhDZx0zOtc4KzNplc7MZrCz3ghd8A"},
     {"id": "karljacobs", "name": "Karl Jacobs", "emoji": "🎬", "rarity": "rare", "handle": "KarlJacobs",
-     "aliases": [], "hint": "Tales from the SMP, bright hoodies"},
+     "aliases": [], "hint": "Tales from the SMP, bright hoodies", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mXZLcu3tnFrCoCbTN0zCJheydnbG13PWI-a4urQZrqZQ"},
     {"id": "tubbo", "name": "Tubbo", "emoji": "🎬", "rarity": "common", "handle": "Tubbo",
-     "aliases": [], "hint": "Bees, nukes and Minecraft"},
+     "aliases": [], "hint": "Bees, nukes and Minecraft", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nZT5KreUXUL4Yp8hLMsZnDweb8-NGKBkXXT2Yc5KoK7dA"},
     {"id": "ranboo", "name": "Ranboo", "emoji": "🎬", "rarity": "rare", "handle": "Ranboo",
-     "aliases": [], "hint": "Memory-loss jokes and genloss"},
+     "aliases": [], "hint": "Memory-loss jokes and genloss", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nU-7qBH4MkvXhxPJ-MRApIb8_myr4-xq61STOHrLGUpg"},
     {"id": "philza", "name": "Philza", "emoji": "🎬", "rarity": "rare", "handle": "Philza",
-     "aliases": [], "hint": "Hardcore Minecraft, crow father"},
+     "aliases": [], "hint": "Hardcore Minecraft, crow father", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ioNLqg7_tT-ByG1l_GbjV6yNnbkfharWNAeNP_F4QEeALwF5aduS4C387bSDfGE8iDIzO4sVTw"},
     {"id": "corpsehusband", "name": "Corpse Husband", "emoji": "🎬", "rarity": "epic", "handle": "CorpseHusband",
-     "aliases": [], "hint": "That voice, no face"},
+     "aliases": [], "hint": "That voice, no face", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nd_hFnUHAASvFICHe3BJr7ktacJJemBQ6iXfswNW5wR-0"},
     {"id": "preston", "name": "Preston", "emoji": "🎬", "rarity": "common", "handle": "PrestonPlayz",
-     "aliases": [], "hint": "Minecraft and Fortnite challenges"},
+     "aliases": [], "hint": "Minecraft and Fortnite challenges", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_lsdcmmUcwdYIBXTz4H3bae3QalHQcbCHg9aJs6ve4HZZM"},
     {"id": "codyko", "name": "Cody Ko", "emoji": "🎬", "rarity": "rare", "handle": "codyko",
-     "aliases": [], "hint": "That's cringe, commentary king"},
+     "aliases": [], "hint": "That's cringe, commentary king", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kBqMZqaPB_MqoFYJUCPQYvyTF0xswg5LG8CKomt5wlgZg"},
     {"id": "noelmiller", "name": "Noel Miller", "emoji": "🎬", "rarity": "common", "handle": "NoelMiller",
-     "aliases": [], "hint": "Cody's podcast partner in crime"},
+     "aliases": [], "hint": "Cody's podcast partner in crime", "verified_handle": True, "image": "https://yt3.googleusercontent.com/6BWV2pyBEcJIgbzxCAHQX0EQtqRD23vyZsaUrHwAS2oPSuNPvOI5nELBB6fJPQA1xaxxTnTP"},
     {"id": "kurtisconner", "name": "Kurtis Conner", "emoji": "🎬", "rarity": "rare", "handle": "kurtisconner",
-     "aliases": [], "hint": "Canadian commentary, big hair"},
+     "aliases": [], "hint": "Canadian commentary, big hair", "verified_handle": True, "image": "https://yt3.googleusercontent.com/gymXnzJs6g7N3U1ferseSCoMaiq05JOskMHcqrIaJ2clxbJY4bNaivEdxIAufhoa20XIVnnLig"},
     {"id": "dannygonzalez", "name": "Danny Gonzalez", "emoji": "🎬", "rarity": "rare", "handle": "dannygonzalez",
-     "aliases": [], "hint": "Greg, and questionable content"},
+     "aliases": [], "hint": "Greg, and questionable content", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kqdMbZ32UBjXkldPXNZTXuhQWMMWCPS_2YueoeiOlktQ0"},
     {"id": "drewgooden", "name": "Drew Gooden", "emoji": "🎬", "rarity": "rare", "handle": "drewgooden",
-     "aliases": [], "hint": "Road work ahead? Deadpan reviews"},
+     "aliases": [], "hint": "Road work ahead? Deadpan reviews", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_meVweJTuxidVbea_mHLmv6DrVou5pfOKil3fg5BrJysg"},
     {"id": "jarvisjohnson", "name": "Jarvis Johnson", "emoji": "🎬", "rarity": "rare", "handle": "JarvisJohnson",
-     "aliases": [], "hint": "Ex-tech, now commentary gold"},
+     "aliases": [], "hint": "Ex-tech, now commentary gold", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mrS55KGO2FnGxvpJTKfSidRgyRY4MSVEj5dt10KUHaz1g"},
     {"id": "eddyburback", "name": "Eddy Burback", "emoji": "🎬", "rarity": "common", "handle": "eddyburback",
-     "aliases": [], "hint": "Theme parks and internet rabbit holes"},
+     "aliases": [], "hint": "Theme parks and internet rabbit holes", "verified_handle": True, "image": "https://yt3.googleusercontent.com/aBhyHi5ajOdhOA44JjECJmbEg1UYdQOqjQudF-rLOA5I37gwIVyAH664t6UCD4NRA9-gCYtG"},
     {"id": "philipdefranco", "name": "Philip DeFranco", "emoji": "🎬", "rarity": "epic", "handle": "PhilipDeFranco",
-     "aliases": [], "hint": "Daily news, 'sup you beautiful bastards"},
+     "aliases": [], "hint": "Daily news, 'sup you beautiful bastards", "verified_handle": True, "image": "https://yt3.googleusercontent.com/EVLSNMtuPc2KUy44v0kWydLd-Chv8D_CpyvyB6g4Ol8HM-51jxEzUCNo1oj9RtMmB5cC0fw6pQ"},
     {"id": "h3podcast", "name": "H3 Podcast", "emoji": "🎬", "rarity": "rare", "handle": "H3Podcast",
-     "aliases": [], "hint": "Ethan and Hila, long-form pods"},
+     "aliases": [], "hint": "Ethan and Hila, long-form pods", "verified_handle": True, "image": "https://yt3.googleusercontent.com/pAs36K_9aufyo8lveD9vjh02dRWPbsiZovqp6gxcIM6jIusLhwS2eU1VOMHlLyOT8UJ2FPKG6-I"},
     {"id": "dharmann", "name": "Dhar Mann", "emoji": "🎬", "rarity": "common", "handle": "DharMann",
-     "aliases": [], "hint": "So you see, morals are important"},
+     "aliases": [], "hint": "So you see, morals are important", "verified_handle": True, "image": "https://yt3.googleusercontent.com/osxs7UlkTYpb0Ug57x02xu87r5jRTLh8q7LIsBEPJaqoplqfHSdSN3xi86AEetbJBvXFO1qonQ"},
     {"id": "ryanhiga", "name": "Ryan Higa", "emoji": "🎬", "rarity": "rare", "handle": "RyanHiga",
-     "aliases": [], "hint": "NigaHiga, the OG of YouTube comedy"},
+     "aliases": [], "hint": "NigaHiga, the OG of YouTube comedy", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nMUN37skTBXBLde59aWMknwocv8-yZazE3Q_vUPuBSGJY"},
     {"id": "zachking", "name": "Zach King", "emoji": "🎬", "rarity": "epic", "handle": "ZachKing",
-     "aliases": [], "hint": "Magic vines, digital illusions"},
+     "aliases": [], "hint": "Magic vines, digital illusions", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kik7i7hId8EjFMERTw3_j8ODyhoot8JF3iUJRs53htOJc"},
     {"id": "safiyanygaard", "name": "Safiya Nygaard", "emoji": "🎬", "rarity": "rare", "handle": "SafiyaNygaard",
-     "aliases": [], "hint": "Bad makeup science and experiments"},
+     "aliases": [], "hint": "Bad makeup science and experiments", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kWVZIZfrF5u_NlubEAQgXoegyKOPih60YMyYxWtCGFkxo"},
     {"id": "simplynailogical", "name": "Simply Nailogical", "emoji": "🎬", "rarity": "common", "handle": "SimplyNailogical",
-     "aliases": [], "hint": "Holo, and nail art chaos"},
+     "aliases": [], "hint": "Holo, and nail art chaos", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_n7DQWXbtL-nFJVzhc6acqWogx-A0zNRzQ6LK2YachYCMA"},
     {"id": "goodmythicalmorning", "name": "Good Mythical Morning", "emoji": "🎬", "rarity": "epic", "handle": "GoodMythicalMorning",
-     "aliases": [], "hint": "Rhett and Link, daily morning show"},
+     "aliases": [], "hint": "Rhett and Link, daily morning show", "verified_handle": True, "image": "https://yt3.googleusercontent.com/wgE-FDE-6LkWcVtmWpUipGSttE3CI-hYTJ0ICSatwVUbvJPJQQ32x0iEdLP5UOeD03wH6UlV"},
     {"id": "caseyneistat", "name": "Casey Neistat", "emoji": "🎬", "rarity": "epic", "handle": "CaseyNeistat",
-     "aliases": [], "hint": "Boogie board, NYC, storytelling"},
+     "aliases": [], "hint": "Boogie board, NYC, storytelling", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_n4AHNRd0upuWqg3NZq4iXWP5JSbnKHh_nbzhOmgGzUc3k"},
     {"id": "tomscott", "name": "Tom Scott", "emoji": "🎬", "rarity": "epic", "handle": "TomScottGo",
-     "aliases": [], "hint": "Things you might not know, and a red shirt"},
+     "aliases": [], "hint": "Things you might not know, and a red shirt", "verified_handle": True, "image": "https://yt3.googleusercontent.com/WxHs0Jf1Jp_4ZU84wxnRL0owNHkzaLUEiD-GIfgCrVjZ0JhgriPTdPfGrkf-U7zwIs5zQl9ccg"},
     {"id": "vsauce", "name": "Vsauce", "emoji": "🎬", "rarity": "legendary", "handle": "Vsauce",
-     "aliases": [], "hint": "Hey, Vsauce, Michael here"},
+     "aliases": [], "hint": "Hey, Vsauce, Michael here", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mpYedipdXUXCKkwjQEeFrepFlDHZ0LiczqWeKyG0YmJvA"},
     {"id": "veritasium", "name": "Veritasium", "emoji": "🎬", "rarity": "epic", "handle": "veritasium",
-     "aliases": [], "hint": "Science with a twisty payoff"},
+     "aliases": [], "hint": "Science with a twisty payoff", "verified_handle": True, "image": "https://yt3.googleusercontent.com/7vCbvtCqtjQ3YLgsJt7Y952MQV1sBvhllSCSxHP8_sVZdcPCBrITfhkN2RdyCuwPnsByq-1GoA"},
     {"id": "kurzgesagt", "name": "Kurzgesagt", "emoji": "🎬", "rarity": "epic", "handle": "kurzgesagt",
-     "aliases": [], "hint": "Birds explaining the universe"},
+     "aliases": [], "hint": "Birds explaining the universe", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_n1Ribd7LwdP_qKtqWL3ZDfIgv9M1d6g78VwpHGXVR2Ir4"},
     {"id": "smartereveryday", "name": "SmarterEveryDay", "emoji": "🎬", "rarity": "rare", "handle": "smartereveryday",
-     "aliases": [], "hint": "Slow-motion science, Southern drawl"},
+     "aliases": [], "hint": "Slow-motion science, Southern drawl", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_l59Ewmp0DHZBRWbY9dVqjd2_mWwvrn8ad0bJfmdbMRYcA"},
     {"id": "numberphile", "name": "Numberphile", "emoji": "🎬", "rarity": "rare", "handle": "numberphile",
-     "aliases": [], "hint": "Brown paper, big numbers"},
+     "aliases": [], "hint": "Brown paper, big numbers", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nmbQSAGKk1OZCBBf_sPJqLoFfYOVDWRDzALocBjGQtHeI"},
     {"id": "computerphile", "name": "Computerphile", "emoji": "🎬", "rarity": "rare", "handle": "Computerphile",
-     "aliases": [], "hint": "CS concepts on a whiteboard"},
+     "aliases": [], "hint": "CS concepts on a whiteboard", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ebHMyRfch3u2UTZN1WQJDp9J5U7o38T_WnGkd2QhAIQwBgvozdaOCOnfDMtngtoHWutJvLl4i0c"},
     {"id": "stevemould", "name": "Steve Mould", "emoji": "🎬", "rarity": "rare", "handle": "SteveMould",
-     "aliases": [], "hint": "Physics toys and curiosity"},
+     "aliases": [], "hint": "Physics toys and curiosity", "verified_handle": True, "image": "https://yt3.googleusercontent.com/iX-akiHlJYuPDq4YVBO83cfjWW0aQefdewmI326XVhZkzxnS3MrqNVi49J33jLBw5LR_ZVyKFA"},
     {"id": "mattparker", "name": "Matt Parker", "emoji": "🎬", "rarity": "rare", "handle": "standupmaths",
-     "aliases": [], "hint": "Stand-up maths, Pi Day records"},
+     "aliases": [], "hint": "Stand-up maths, Pi Day records", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kH1XY27N-S65HtyJ97eLeiYGSqanZuuVP2NgTzBt081h4"},
     {"id": "kylehill", "name": "Kyle Hill", "emoji": "🎬", "rarity": "rare", "handle": "KyleHill",
-     "aliases": [], "hint": "Half as interesting science"},
+     "aliases": [], "hint": "Half as interesting science", "verified_handle": True, "image": "https://yt3.googleusercontent.com/zxmNBADieDFpeXt8P99RWNrnpev6QxWl4tECz4f_pL_md_AH_GFdHb27269nH76jbzW3_xfGWQ"},
     {"id": "electroboom", "name": "ElectroBOOM", "emoji": "🎬", "rarity": "rare", "handle": "ElectroBOOM",
-     "aliases": [], "hint": "Electricity, and pain"},
+     "aliases": [], "hint": "Electricity, and pain", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nnG7-mZVY0oCnbM1yY_pGC_uOA-AoWYlpvDI9kOW5JDFE"},
     {"id": "minutephysics", "name": "MinutePhysics", "emoji": "🎬", "rarity": "common", "handle": "minutephysics",
-     "aliases": [], "hint": "Fast whiteboard physics"},
+     "aliases": [], "hint": "Fast whiteboard physics", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mNlRy8Ablr-4VtAT6eDe7ED-3tfNFZ0FwhEYdtc6B_oQ"},
     {"id": "linustechtips", "name": "Linus Tech Tips", "emoji": "🎬", "rarity": "legendary", "handle": "LinusTechTips",
-     "aliases": [], "hint": "Drop test, and many cables"},
+     "aliases": [], "hint": "Drop test, and many cables", "verified_handle": True, "image": "https://yt3.googleusercontent.com/gnvYLhXy8FAlPXZ2RTrkrgj-5kyt0vdE2FUGVOiKGdEZIa-wN5A-7nwZBlWJLzUMmoh1NWAU"},
     {"id": "jayztwocents", "name": "JayzTwoCents", "emoji": "🎬", "rarity": "rare", "handle": "JayzTwoCents",
-     "aliases": [], "hint": "PC building and water cooling"},
+     "aliases": [], "hint": "PC building and water cooling", "verified_handle": True, "image": "https://yt3.googleusercontent.com/60ZHdHfspX1q6YI8_RW8Zz8fyR8Ne5aDHIwQ0TGN-vFkBWp5J1htI2VsLQQsnVoQbGhIxmJ3lQ"},
     {"id": "gamersnexus", "name": "Gamers Nexus", "emoji": "🎬", "rarity": "rare", "handle": "GamersNexus",
-     "aliases": [], "hint": "Thermals and charts, very thorough"},
+     "aliases": [], "hint": "Thermals and charts, very thorough", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_n50Rj8oqwUnusv4I6_DllKflZrSdSxmXhYvpHs0hOEj5o"},
     {"id": "paulshardware", "name": "Paul's Hardware", "emoji": "🎬", "rarity": "common", "handle": "paulshardware",
-     "aliases": [], "hint": "Build guides and news"},
+     "aliases": [], "hint": "Build guides and news", "verified_handle": True, "image": "https://yt3.googleusercontent.com/t_F9HmCxAa7sFI-5QOHd2S6Wloo75URzMU5DGr_v-vNGumC_RehLhPdyE-1XNhN5V_zXNJKxTZU"},
     {"id": "austinevans", "name": "Austin Evans", "emoji": "🎬", "rarity": "rare", "handle": "austinevans",
-     "aliases": [], "hint": "Consumer tech, lots of phones"},
+     "aliases": [], "hint": "Consumer tech, lots of phones", "verified_handle": True, "image": "https://yt3.googleusercontent.com/bJFry2IjWTvfFjpg3Cg4lY6n-7Qcp-sHUB3zCFZnQ0AzyBN56tW3LMqryA8EAAHH24VZCrWh7xI"},
     {"id": "dave2d", "name": "Dave2D", "emoji": "🎬", "rarity": "rare", "handle": "Dave2D",
-     "aliases": [], "hint": "Laptop reviews, calm voice"},
+     "aliases": [], "hint": "Laptop reviews, calm voice", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_lltZkOAE5XVIlI8U5QVXmdASgYyJiJps-LkO-uQnTwLMQ"},
     {"id": "ijustine", "name": "iJustine", "emoji": "🎬", "rarity": "common", "handle": "iJustine",
-     "aliases": [], "hint": "Apple everything, high energy"},
+     "aliases": [], "hint": "Apple everything, high energy", "verified_handle": True, "image": "https://yt3.googleusercontent.com/TyFX--bFsY4XVipOdLiWA-NK8X0iwocs9ViPuoSMddCEgwSCrGCPQdRIe5KhEwwmRTvPv6vpnA"},
     {"id": "unboxtherapy", "name": "Unbox Therapy", "emoji": "🎬", "rarity": "rare", "handle": "unboxtherapy",
-     "aliases": [], "hint": "Gadgets and the bend test"},
+     "aliases": [], "hint": "Gadgets and the bend test", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mrdFKrYUtuMEqVUWPmtKSzy0weSdlawiMI2VPqP9yq1ks"},
     {"id": "jerryrigeverything", "name": "JerryRigEverything", "emoji": "🎬", "rarity": "rare", "handle": "JerryRigEverything",
-     "aliases": [], "hint": "Scratches, burns and bends phones"},
+     "aliases": [], "hint": "Scratches, burns and bends phones", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ebXyJhsgpfIHg4PXw3eSFTeSx6Ud1us26Gwgshe9jPBvSu82SpQkFmc1GK7q2Go2KJePYQ5Icg"},
     {"id": "snazzylabs", "name": "Snazzy Labs", "emoji": "🎬", "rarity": "common", "handle": "SnazzyLabs",
-     "aliases": [], "hint": "Macs, and hacking them"},
+     "aliases": [], "hint": "Macs, and hacking them", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nRmi_DsSmwPte9KlMxnmAATQsx-oxFs0RcrYiZR3A"},
     {"id": "fireship", "name": "Fireship", "emoji": "🎬", "rarity": "epic", "handle": "Fireship",
-     "aliases": [], "hint": "100 seconds of anything, very fast"},
+     "aliases": [], "hint": "100 seconds of anything, very fast", "verified_handle": True, "image": "https://yt3.googleusercontent.com/3fPNbkf_xPyCleq77ZhcxyeorY97NtMHVNUbaAON_RBDH9ydL4hJkjxC8x_4mpuopkB8oI7Ct6Y"},
     {"id": "theprimeagen", "name": "ThePrimeagen", "emoji": "🎬", "rarity": "rare", "handle": "ThePrimeagen",
-     "aliases": [], "hint": "Vim, Rust and strong opinions"},
+     "aliases": [], "hint": "Vim, Rust and strong opinions", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_laY82JAzs_2edBDxrxLgLWshhMK04SpAqOfoEzexOBZg"},
     {"id": "michaelreeves", "name": "Michael Reeves", "emoji": "🎬", "rarity": "epic", "handle": "MichaelReeves",
-     "aliases": [], "hint": "Robots that should not exist"},
+     "aliases": [], "hint": "Robots that should not exist", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nA1CW3Etd_zH2e9n5Fa2SgqXm173tL0rHCXaDY0wqRYwI"},
     {"id": "williamosman", "name": "William Osman", "emoji": "🎬", "rarity": "rare", "handle": "WilliamOsman",
-     "aliases": [], "hint": "Questionable engineering, lasers"},
+     "aliases": [], "hint": "Questionable engineering, lasers", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kLoSU3ge6hrBUXHxVeKMiGe4bdGS1wACFV0oFgWxDMKvj-"},
     {"id": "allenpan", "name": "Allen Pan", "emoji": "🎬", "rarity": "rare", "handle": "AllenPan",
-     "aliases": [], "hint": "Sufficiently advanced, dinosaurs"},
+     "aliases": [], "hint": "Sufficiently advanced, dinosaurs", "verified_handle": True, "image": "https://yt3.googleusercontent.com/aCeu02Md-3sk7Hc0wEkZybdmyDnosD4iLADnQ2izJ4-vOonyrBIQ1nUE2nz3iCDNfI3t_2hBYw"},
     {"id": "colinfurze", "name": "Colin Furze", "emoji": "🎬", "rarity": "epic", "handle": "colinfurze",
-     "aliases": [], "hint": "Shed builds, flamethrowers, no safety"},
+     "aliases": [], "hint": "Shed builds, flamethrowers, no safety", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_nx0_jjIdix_fYOdMrts1Qk3GsxLzurlxZecRi93qEw-js"},
     {"id": "thehacksmith", "name": "the Hacksmith", "emoji": "🎬", "rarity": "rare", "handle": "thehacksmith",
-     "aliases": [], "hint": "Real-life superhero gadgets"},
+     "aliases": [], "hint": "Real-life superhero gadgets", "verified_handle": True, "image": "https://yt3.googleusercontent.com/XR_KbXvA6WHYHJQToJoKGGAG0Rj2BakhmWUx8xej3vObf-y1635Y-H4S8Hqlz44WQhMMCyNw1r4"},
     {"id": "stuffmadehere", "name": "Stuff Made Here", "emoji": "🎬", "rarity": "epic", "handle": "StuffMadeHere",
-     "aliases": [], "hint": "Engineering that solves nothing"},
+     "aliases": [], "hint": "Engineering that solves nothing", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mzfzJ9E1WEzyt1YlPXemHOwGBBnVCKzXva_mzmS5qqMg"},
     {"id": "petersripol", "name": "Peter Sripol", "emoji": "🎬", "rarity": "rare", "handle": "PeterSripol",
-     "aliases": [], "hint": "Homebuilt aircraft, near-disasters"},
+     "aliases": [], "hint": "Homebuilt aircraft, near-disasters", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_lqvwFWs6oyR1P-70dGYS5asmr1X3hd2ZzUUcAqHHPuKbg"},
     {"id": "simonegiertz", "name": "Simone Giertz", "emoji": "🎬", "rarity": "rare", "handle": "SimoneGiertz",
-     "aliases": [], "hint": "Queen of useless robots"},
+     "aliases": [], "hint": "Queen of useless robots", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_llfi-8d2Zve1U9FXZPXZsKNB9_65U5gHwKRwAoHLOUDg"},
     {"id": "laurakampf", "name": "Laura Kampf", "emoji": "🎬", "rarity": "common", "handle": "LauraKampf",
-     "aliases": [], "hint": "Woodworking and street finds"},
+     "aliases": [], "hint": "Woodworking and street finds", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mptbQK6HlhnubRbIRaaRyg22Nx1fD-8OlJZzqFzP8Dig"},
     {"id": "ididathing", "name": "I did a thing", "emoji": "🎬", "rarity": "rare", "handle": "Ididathing",
-     "aliases": [], "hint": "Absurd builds, Australian accent"},
+     "aliases": [], "hint": "Absurd builds, Australian accent", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mj5xe_kr7JYc4PDpmc3FaYasPAg5ups859rpzqeXnkuXg"},
     {"id": "howridiculous", "name": "How Ridiculous", "emoji": "🎬", "rarity": "common", "handle": "HowRidiculous",
-     "aliases": [], "hint": "Dropping things from very high"},
+     "aliases": [], "hint": "Dropping things from very high", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kxmWfLMY_bKthwriveVb4LhWN9OLOYirTLQxPXqzqBmtg"},
     {"id": "flitetest", "name": "Flite Test", "emoji": "🎬", "rarity": "common", "handle": "FliteTest",
-     "aliases": [], "hint": "Foam board planes everywhere"},
+     "aliases": [], "hint": "Foam board planes everywhere", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_mEeMA5TaGXJZuUx-15_BqoEVJz87N4zIVTS-OUKMqGROo"},
     {"id": "nerdforge", "name": "Nerdforge", "emoji": "🎬", "rarity": "rare", "handle": "Nerdforge",
-     "aliases": [], "hint": "Crafts, dioramas and armour"},
+     "aliases": [], "hint": "Crafts, dioramas and armour", "verified_handle": True, "image": "https://yt3.googleusercontent.com/nvaYpZA8ePSNfJJ8QFLtpq42WSZcWUhaj8LyPFPS6X_-rQQbZjIIbxz9IKoBNjecjEu-37dqAQ"},
     {"id": "aphmau", "name": "Aphmau", "emoji": "🎬", "rarity": "common", "handle": "Aphmau",
-     "aliases": [], "hint": "Minecraft roleplay, cats"},
+     "aliases": [], "hint": "Minecraft roleplay, cats", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_kGFsd6S-kWwQvx_DobbU5MCwPc6Rvec6-fDVnjqiEW8mI"},
     {"id": "ssundee", "name": "SSundee", "emoji": "🎬", "rarity": "common", "handle": "SSundee",
-     "aliases": [], "hint": "Modded Minecraft with friends"},
+     "aliases": [], "hint": "Modded Minecraft with friends", "verified_handle": True, "image": "https://yt3.googleusercontent.com/ytc/AIdro_m8dGmeU2bqMcUcJqK6j_CNescTudYadR4uWPsL9U62qlQ"},
 ]
 YT_BY_ID = {y["id"]: y for y in YOUTUBERS}
 
@@ -3827,21 +3827,18 @@ YT_CURRENT: dict = {"id": "", "channel_id": 0, "spawned_at": 0.0}
 
 
 def _yt_image(yt: dict) -> str:
-    """Real YouTube channel avatar, with a generated one as a backend fallback.
+    """Avatar for a creator.
 
-    unavatar resolves by handle or channel name. ?fallback= means a channel it
-    cannot find degrades to a DiceBear avatar instead of a broken image, so the
-    card always renders. Anything set with !ytavatar wins outright.
+    Order: manual override (!ytavatar) -> verified YouTube CDN avatar ->
+    generated fallback. Every creator whose channel was verified carries its
+    real avatar URL, so cards never depend on a rate-limited proxy.
     """
     override = SETTINGS.get("yt_avatar", {}).get(yt["id"])
     if override:
         return override
-    handle = yt.get("handle") or yt["name"]
-    fallback = f"https://api.dicebear.com/9.x/bottts/png?size=512&seed={yt['id']}"
-    return (
-        f"https://unavatar.io/youtube/{urlquote(handle)}"
-        f"?fallback={urlquote(fallback, safe='')}"
-    )
+    if yt.get("image"):
+        return yt["image"]
+    return f"https://api.dicebear.com/9.x/bottts/png?size=512&seed={yt['id']}"
 
 
 def _yt_emoji(yt: dict) -> str:
@@ -4306,6 +4303,136 @@ async def yt_dupes(ctx: commands.Context, member: Optional[discord.Member] = Non
              for y, c in dupes]
     embed = fun("\n".join(lines)[:3900], f"🔁 {target.display_name}'s duplicates")
     embed.set_footer(text=f"{PREFIX}yttrade @user <yours> for <theirs>")
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="ytinfo")
+async def yt_info(ctx: commands.Context, *, creator: str = "") -> None:
+    """Everything about one creator. Usage: !ytinfo MrBeast"""
+    yt = _resolve_yt(creator) if creator.strip() else _current_yt()
+    if yt is None:
+        await ctx.send(embed=err(
+            f"Usage: `{PREFIX}ytinfo MrBeast` — or `{PREFIX}yt` for the current one."
+        ))
+        return
+
+    owners, copies = 0, 0
+    for col in COLLECTIONS.values():
+        if yt["id"] in col:
+            owners += 1
+            c = col[yt["id"]]
+            copies += int(c) if isinstance(c, int) else 1
+
+    mine = _owned_count(ctx.author.id, yt["id"])
+    is_current = YT_CURRENT.get("id") == yt["id"]
+
+    embed = discord.Embed(
+        title=f"{_yt_emoji(yt)} {yt['name']}",
+        description=f"-# {yt['hint']}",
+        colour=COLOUR_FUN,
+    )
+    embed.set_thumbnail(url=_yt_image(yt))
+    embed.add_field(name="Rarity", value=yt["rarity"], inline=True)
+    embed.add_field(name="Subscribers", value=f"{yt['subs']:,}" if yt.get("subs") else "—", inline=True)
+    embed.add_field(name="Up for grabs", value="yes" if is_current else "no", inline=True)
+    embed.add_field(name="You own", value=f"**×{mine}**" if mine else "not yet", inline=True)
+    embed.add_field(name="Collectors", value=str(owners), inline=True)
+    embed.add_field(name="Copies in circulation", value=str(copies), inline=True)
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="ytmissing")
+async def yt_missing(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """List the creators you still need, grouped by rarity."""
+    target = member or ctx.author
+    mine = COLLECTIONS.get(str(target.id), {})
+    if not mine:
+        await ctx.send(embed=info(
+            f"{target.mention} hasn't collected anything yet. Start with `{PREFIX}yt`.",
+            "🎯 Missing",
+        ))
+        return
+
+    embed = fun("", f"🎯 What {target.display_name} is missing")
+    for rarity in RARITY_ORDER:
+        missing = [y["name"] for y in YOUTUBERS
+                   if y["rarity"] == rarity and y["id"] not in mine]
+        if missing:
+            embed.add_field(
+                name=f"{rarity.capitalize()} ({len(missing)})",
+                value=", ".join(missing)[:1024],
+                inline=False,
+            )
+    have = len([i for i in mine if i in YT_BY_ID])
+    embed.set_footer(text=f"{have}/{len(YOUTUBERS)} collected")
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="ytgive")
+async def yt_give(ctx: commands.Context, member: discord.Member, *, creator: str = "") -> None:
+    """Give a duplicate to someone. Usage: !ytgive @user MrBeast"""
+    if member.bot or member.id == ctx.author.id:
+        await ctx.send(embed=err("Pick another member."))
+        return
+    yt = _resolve_yt(creator)
+    if yt is None:
+        await ctx.send(embed=err(f"No creator called `{creator}`. Check `{PREFIX}dupes`."))
+        return
+
+    have = _owned_count(ctx.author.id, yt["id"])
+    if have < 1:
+        await ctx.send(embed=err(f"You don't own **{yt['name']}**."))
+        return
+
+    _take_yt(ctx.author.id, yt["id"], 1)
+    _give_yt(member.id, yt["id"], 1)
+    save_data()
+
+    note = ""
+    if have == 1:
+        note = f"\n-# That was your only copy, so it left your collection."
+    embed = ok(
+        f"{_yt_emoji(yt)} Gave **{yt['name']}** to {member.mention}.{note}",
+        "🎁 Gifted",
+    )
+    embed.set_thumbnail(url=_yt_image(yt))
+    await ctx.send(embed=embed)
+
+
+@bot.command(name="ytstats")
+async def yt_stats(ctx: commands.Context, member: Optional[discord.Member] = None) -> None:
+    """Your collection stats and rank."""
+    target = member or ctx.author
+    mine = COLLECTIONS.get(str(target.id), {})
+    counts = _rarity_counts(mine.keys())
+    distinct = len([i for i in mine if i in YT_BY_ID])
+    copies = sum(int(c) if isinstance(c, int) else 1 for c in mine.values())
+    dupes = sum(1 for c in mine.values() if (int(c) if isinstance(c, int) else 1) > 1)
+
+    ranked = sorted(
+        COLLECTIONS.items(),
+        key=lambda kv: len([i for i in kv[1] if i in YT_BY_ID]),
+        reverse=True,
+    )
+    rank = next((i for i, (uid, _) in enumerate(ranked, 1) if uid == str(target.id)), None)
+
+    pct = distinct / len(YOUTUBERS) * 100
+    embed = fun(
+        f"**Collected:** {distinct}/{len(YOUTUBERS)} ({pct:.1f}%)\n"
+        f"**Total copies:** {copies}\n"
+        f"**Unique with duplicates:** {dupes}\n"
+        f"**Rank:** {f'#{rank} of {len(ranked)}' if rank else '—'}",
+        f"📊 {target.display_name}'s stats",
+    )
+    embed.add_field(
+        name="By rarity",
+        value="\n".join(
+            f"{r.capitalize()}: **{counts[r]}**/{sum(1 for y in YOUTUBERS if y['rarity']==r)}"
+            for r in RARITY_ORDER
+        ),
+        inline=False,
+    )
+    embed.set_footer(text=f"{PREFIX}ytmissing for what's left · {PREFIX}dupes to trade")
     await ctx.send(embed=embed)
 
 
@@ -5051,9 +5178,10 @@ CATEGORIES: dict[str, list[str]] = {
         "eco profile", "eco stats", "eco daily", "eco work", "eco balance",
         "eco gamble", "eco rob", "eco pay", "eco leaderboard", "eco weekly",
     ],
-    "🎮 YouTuber game": ["yt", "guess", "collection", "dupes", "ytlb",
-                          "yttrade", "yttradeaccept", "yttradecancel",
-                          "ytspawn", "ytset", "ytavatar", "ytemoji"],
+    "🎮 YouTuber game": ["yt", "guess", "collection", "dupes", "ytlb", "ytinfo",
+                          "ytmissing", "ytstats", "ytgive", "yttrade",
+                          "yttradeaccept", "yttradecancel", "ytspawn", "ytset",
+                          "ytavatar", "ytemoji"],
     "👋 Welcome": ["autorole"],
     "🛒 Market": [
         "wallet", "shop", "inv",

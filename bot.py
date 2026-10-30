@@ -5194,6 +5194,27 @@ CATEGORIES: dict[str, list[str]] = {
 }
 
 
+# --- Synergy applications: apply / apps / accept / decline -----------------
+# Loaded last so it can extend CATEGORIES above. A failure here must never stop
+# the bot from starting, so everything is wrapped.
+try:
+    from applications_ext import attach as _attach_applications
+
+    _attach_applications(
+        bot,
+        prefix=PREFIX,
+        owner_id=OWNER_ID,
+        get_owner=get_owner,
+        ok=ok,
+        err=err,
+        info=info,
+        categories=CATEGORIES,
+    )
+    print("✅ applications commands loaded (apply / apps / accept / decline)")
+except Exception as _exc:  # noqa: BLE001
+    print(f"⚠️ applications extension failed to load: {_exc}")
+
+
 # ===========================================================================
 # ENTRY POINT
 # ===========================================================================

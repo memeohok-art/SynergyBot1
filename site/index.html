@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Synergy — creator comment assistant</title>
+<style>
+:root{--ink:#0f1720;--muted:#546070;--line:#e3e8ee;--accent:#0f766e;--bg:#fbfcfd}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:56px 22px 80px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#14b8a6,#0ea5e9);display:grid;place-items:center;color:#04212a;font-weight:800}
+h1{font-size:34px;letter-spacing:-.03em;margin-bottom:12px}
+h2{font-size:19px;margin:34px 0 10px;letter-spacing:-.01em}
+p,li{color:var(--muted);font-size:15.5px}
+ul{margin:10px 0 0 20px}
+li{margin-bottom:7px}
+.lead{font-size:17px;color:var(--ink)}
+.card{border:1px solid var(--line);border-radius:14px;padding:20px 22px;background:#fff;margin-top:18px}
+a{color:var(--accent)}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+code{background:#eef2f6;padding:1px 6px;border-radius:5px;font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="mark">S</div>
+    <strong>Synergy</strong>
+  </div>
+
+  <h1>Synergy — creator comment assistant</h1>
+  <p class="lead">Synergy is a small tool for YouTube creators. A creator asks to be added, proves the
+  channel is theirs, and Synergy then leaves one short, relevant comment on each new video they publish.</p>
+
+  <h2>What Synergy does</h2>
+  <ul>
+    <li>Reads a channel's public video list (titles, durations, publish dates) using the YouTube Data API.</li>
+    <li>Posts one comment per video, written for that specific video, spaced at least a minute apart.</li>
+    <li>Never comments on the same video twice, and never exceeds a fixed small daily limit per channel.</li>
+    <li>Lets creators apply and withdraw at any time by asking the operator.</li>
+  </ul>
+
+  <h2>What Synergy does not do</h2>
+  <ul>
+    <li>It does not read private data, messages, or analytics.</li>
+    <li>It does not post on behalf of anyone but the channel that authorised it.</li>
+    <li>It does not sell, share, or publish any data to third parties.</li>
+  </ul>
+
+  <h2>Verifying channel ownership</h2>
+  <p>A creator is only added after placing a one-time code in their own channel description, which only
+  someone with channel access can do. The code is checked once and can then be removed.</p>
+
+  <div class="card">
+    <strong>Applying</strong>
+    <p style="margin-top:6px">Applications are handled in the Synergy Discord server. Operators review each
+    request manually; nothing is added automatically.</p>
+  </div>
+
+  <h2>Privacy</h2>
+  <p>How Synergy handles Google user data — what it reads, stores and how to have it deleted — is set out in the
+  <a href="./privacy.html">privacy policy</a>. The same link appears on the Google authorisation screen.</p>
+
+  <footer>
+    Synergy · Contact: <a href="mailto:synergy@example.com">synergy@example.com</a><br>
+    Last updated <span id="d"></span>
+    <script>document.getElementById('d').textContent=new Date().toISOString().slice(0,10)</script>
+  </footer>
+</div>
+</body>
+</html>

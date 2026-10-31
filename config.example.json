@@ -1,0 +1,8 @@
+{
+  "channels": ["@Saklgaming26", "@ur_uncleBS", "@realAPONbs", "@Kryvora", "@APONsGames"],
+  "daily_total": 17,
+  "base_per_channel": 3,
+  "channel_min": { "@Kryvora": 5 },
+  "max_per_run": 3,
+  "delay_seconds": 60
+}
